@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="fs2" default="all" basedir=".">
+    <description>
+        Builds FS2's reference client and indexnode.
+    </description>
+  <property name="src" location="src"/>
+	<property name="doc" location="doc"/>
+  <property name="build" location="build"/>
+  <property name="dist"  location="jars"/>
+	<property name="au"  location="autoupdate"/>
+	  
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}/common"/>
+    <mkdir dir="${build}/client"/>
+    <mkdir dir="${build}/indexnode"/>
+    <mkdir dir="${dist}"/>
+  </target>
+
+  <target name="compilecommon" depends="init"
+        description="compile the common library" >
+  	<javac debug="true" sourcepath="" srcdir="${src}" destdir="${build}">
+  	  <include name="common/**/*.java"/>
+  	</javac>
+  </target>
+  
+  <target name="compileclient" depends="compilecommon"
+        description="compile the client" >
+    <javac debug="true" classpath="${build}/common" sourcepath="" srcdir="${src}" destdir="${build}">
+      <include name="client/**/*.java"/>
+    </javac>
+  </target>
+  
+  <target name="compileindexnode" depends="compilecommon"
+        description="compile the indexnode" >
+    <javac debug="true" classpath="${build}/common" sourcepath="" srcdir="${src}" destdir="${build}">
+      <include name="indexnode/**/*.java"/>
+    </javac>
+  </target>
+
+  <target name="client.jar" depends="compileclient"
+        description="generate the distributable client.jar">
+    
+    <java classname="client.Version" classpath="${build}/common;${build}" outputproperty="clientver"/>
+  	<java classname="client.Version" classpath="${build}/common;${build}" outputproperty="clientdesc">
+  		<arg value="--describe"/>
+  	</java>
+  	
+  	<echo file="${dist}/clientver.txt">${clientver}</echo>
+  	<echo file="${dist}/${clientver}.description">${clientdesc}</echo>
+  	    
+  	<copy todir="${build}/icons">
+  	  <fileset dir="icons"/>
+  	</copy>
+  	
+    <jar jarfile="${dist}/fs2client-${clientver}.jar" basedir="${build}">
+    	<include name="icons/*"/>
+    	<include name="client/**/*.class"/>
+      <include name="common/**/*.class"/>
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="SplashScreen-Image" value="icons/splash.png"/>
+        <attribute name="Main-Class" value="client/ClientExecutor"/>
+      </manifest>
+    </jar>
+  </target>
+	
+	<target name="autoupdate" depends="client.jar" description="create a directory that can be used by the client's autoupdate feature">
+		 <loadfile property="clientver" srcFile="${dist}/clientver.txt"/>
+
+		<copy file="${dist}/${clientver}.description" todir="${au}"/>
+		
+		<mkdir dir="${au}"/>
+		<copy file="${dist}/fs2client-${clientver}.jar" todir="${au}"/>
+		<copy file="${dist}/clientver.txt" tofile="${au}/index.htm"/>
+		
+	</target>
+
+  <target name="indexnode.jar" depends="compileindexnode"
+        description="generate indexnode.jar" >
+       
+    <jar jarfile="${dist}/indexnode-${DSTAMP}.jar" basedir="${build}">
+    	<include name="indexnode/**/*.class"/>
+    	<include name="common/**/*.class"/>
+      <manifest>
+        <attribute name="Built-By" value="${user.name}"/>
+        <attribute name="Main-Class" value="indexnode/IndexNodeExecutor"/>
+      </manifest>
+    </jar>
+    
+  </target>
+
+  <target name="all" depends="client.jar, indexnode.jar, autoupdate"
+        description="generate the distributable client.jar and indexnode.jar" >
+  </target>
+
+  <target name="clean"
+        description="clean up temporaries and distributables" >
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  	<delete dir="${au}"/>
+  </target>
+</project>

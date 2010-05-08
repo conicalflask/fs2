@@ -1,0 +1,19 @@
+This is a provisional description of the 0.8.0 release.
+
+This is a huge update including a significant code clean and restructure,
+and a return to the old values that if it's worth doing something, it's worth doing it right.
+
+Important changes (implemented):
+1) Autoupdate support for all platforms! (including support for updating over both HTTP and FS2 protocols)
+2) Documentation! (although it's not obvious how to distribute this)
+3) Persistant statistics. (all time transfer stats)
+x) Working tray icon!
+
+(todo)
+4) Lower overhead filelist creation and maintainance.
+5) Better system structure, and proper shutdown support.
+6) New gui layout.
+7) Support for preferred sources
+8) More reliable, faster transfers. (resiliant new download controller and Http download system)
+9) multipart downloading for large files.
+10) considerably better gui code for browsing and searching, it should now work over the intertubes (and other high-latency media).
