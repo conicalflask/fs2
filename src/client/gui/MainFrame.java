@@ -18,6 +18,7 @@ import common.Logger;
 
 import client.Version;
 import client.gui.TabItem.FS2Tab;
+import client.gui.settings.SettingsTab;
 import client.platform.ClientConfigDefaults.CK;
 
 /**
@@ -129,6 +130,9 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 				break;
 			case UPLOADS:
 				new UploadsTab(tabs, this);
+				break;
+			case SETTINGS:
+				new SettingsTab(tabs, this);
 				break;
 			default:
 				break;

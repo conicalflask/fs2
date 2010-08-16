@@ -17,11 +17,14 @@ public class ClientConfigDefaults implements ConfigDefaults {
 	
 	/**
 	 * Configurable option keys
+	 * 
+	 * Version numbers are used to enable changes to the defaults to override choices made by the user (in important cases)
+	 * 
 	 * @author gary
 	 */
 	public static class CK {
 		public static final String HEAPSIZE  = "max_heap";
-		public static final String PORT = "port";
+		public static final String PORT = "port_v2";
 		public static final String ALIAS = "alias";
 		public static final String DOWNLOAD_DIRECTORY = "download_dir";
 		public static final String UPLOAD_BYTES_PER_SEC = "upload_bps";
@@ -36,7 +39,7 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		public static final String DEFAULT_SHARE_NAME = "shares/default/name";
 		public static final String DEFAULT_SHARE_PATH = "shares/default/path";
 		public static final String SHARE_AUTOREFRESH_INTERVAL = "share_autorefresh_interval";
-		public static final String UPDATE_POLICY = "update_policy";
+		public static final String UPDATE_POLICY = "update_policy_v2";
 		public static final String HTTP_UPDATE_SOURCES = "http_update_sources";
 		public static final String DEFAULT_HTTP_UPDATE1 = "http_update_sources/empty";
 		public static final String LOG_MESSAGES_TO_DISK = "save_messages";
@@ -44,7 +47,7 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		public static final String DISPLAY_CHAT_NOTIFICATIONS = "display_notifications";
 		public static final String AVATAR_PATH = "avatar_path";
 		
-		
+		//gui bits
 		public static final String MAIN_WINDOW_TOP = "gui/geometry/main_window_top";
 		public static final String MAIN_WINDOW_LEFT = "gui/geometry/main_window_left";
 		public static final String MAIN_WINDOW_WIDTH = "gui/geometry/main_window_width";
@@ -111,7 +114,7 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		defaults.put(CK.SHARE_AUTOREFRESH_INTERVAL, "1800"); //30 minutes.
 		comments.put(CK.SHARE_AUTOREFRESH_INTERVAL, CK.SHARE_AUTOREFRESH_INTERVAL+" is the number of seconds that a share will refresh itself automatically after.");
 		
-		defaults.put(CK.UPDATE_POLICY, "ask");
+		defaults.put(CK.UPDATE_POLICY, "auto");
 		comments.put(CK.UPDATE_POLICY, "update_policy controls the automatic update behaviour.\nSet to 'none' for no autoupdates, 'ask' to make the gui ask and the command line notify (but do nothing)\nor 'auto' to always download and hotpatch new versions");
 		
 		defaults.put(CK.HTTP_UPDATE_SOURCES, "");

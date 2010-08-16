@@ -43,6 +43,15 @@ public class MenuBar extends JMenuBar implements ActionListener, MouseListener {
 	private void addConfigureMenu() {
 		JMenu menu = new JMenu("Configure");
 		this.add(menu);
+
+		registerNewMenuItem(menu, "Settings", frame.gui.util.getImage("settings"), "Manage FS2's settings", new Runnable() {
+			@Override
+			public void run() {
+				frame.openTab(FS2Tab.SETTINGS);
+			}
+		});
+
+		menu.addSeparator();
 		
 		JMenu laf = new JMenu("Look and Feel");
 		menu.add(laf);
