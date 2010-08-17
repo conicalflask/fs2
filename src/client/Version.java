@@ -11,7 +11,7 @@ import common.Util;
  * TODO for the next big version of FS2:
  * Make the logger intercept all console stuff for logging to disk.
  * Make the settings tab useful and pull all config items into it
- * 		Heap
+ * 		Heap (and change critical warning messages)
  * 		Ports
  * 		All current settings
  * Add an indexnode config facility in the gui

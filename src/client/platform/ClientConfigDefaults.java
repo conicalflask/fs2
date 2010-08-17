@@ -68,6 +68,8 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		public static final String STATS_DIVIDER_LOCATION = "gui/stats_divider_location";
 		public static final String STATS_INDEXNODES_COLWIDTHS = "gui/stats_indexnodes_table_columnwidths/col";
 		public static final String UPLOADS_COLWIDTHS = "gui/uploads_table_columnwidths/col";
+		public static final String SETTINGS_COLWIDTHS = "gui/settings_list_columnwidths/col";
+		public static final String SETTINGS_DIVIDER_LOCATION = "gui/settings_divider_location";
 	}
 	
 	protected HashMap<String, String> defaults = new HashMap<String, String>();
@@ -134,6 +136,7 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		defaults.put(CK.FILES_DIVIDER_LOCATION, "150");
 		defaults.put(CK.DOWNLOADS_DIVIDER_LOCATION, "150");
 		defaults.put(CK.STATS_DIVIDER_LOCATION, "150");
+		defaults.put(CK.SETTINGS_DIVIDER_LOCATION, "150");
 		
 		defaults.put(CK.ACTIVE_TAB, "FILES");
 		
