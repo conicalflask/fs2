@@ -3,6 +3,7 @@ package client.gui.settings;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -40,8 +41,8 @@ public class SettingsTab extends TabItem implements PropertyChangeListener,
 	private JPanel rightHand;
 	private FancierTable ft;
 	
-	static ImageIcon tick;
-	static ImageIcon error;
+	static ImageIcon TICK;
+	static ImageIcon ERROR;
 	
 	class SettingsRenderer extends DefaultTableCellRenderer {
 		@Override
@@ -63,8 +64,8 @@ public class SettingsTab extends TabItem implements PropertyChangeListener,
 		super(pane, frame, "Settings", FS2Tab.SETTINGS, frame.getGui().getUtil().getImage("settings"));
 		
 		setLayout(new BorderLayout());
-		tick = frame.getGui().getUtil().getImage("tick");
-		error = frame.getGui().getUtil().getImage("error");
+		TICK = frame.getGui().getUtil().getImage("tick");
+		ERROR = frame.getGui().getUtil().getImage("error");
 		
 		
 		//##########################
@@ -95,8 +96,11 @@ public class SettingsTab extends TabItem implements PropertyChangeListener,
 		
 		ft.getColumn(tm.getColumnName(0)).setCellRenderer(new SettingsRenderer());
 		
+		
 		JScrollPane sp = new JScrollPane(ft);
+		sp.setMinimumSize(new Dimension(100, 100));
 		split.setLeftComponent(sp);
+		
 		
 		//2d) card layout right hand side
 		rightHand = new JPanel(cards);

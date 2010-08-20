@@ -3,6 +3,7 @@ package client.gui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -68,7 +69,9 @@ public class DownloadsTab extends TabItem implements TreeExpansionListener, Acti
 		
 		chunksTable.getSelectionModel().addListSelectionListener(this);
 		
-		return new JScrollPane(chunksTable);
+		JScrollPane ret = new JScrollPane(chunksTable);
+		ret.setMinimumSize(new Dimension(100, 100));
+		return ret;
 	}
 	
 	JSplitPane splitPane;

@@ -6,13 +6,12 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JTextField;
 
-
 import common.Util;
 
 /**
  * A text box that accepts values written in bytes.
  * 
- * If the contents fail validation then the box is painted red and the value becomes -1
+ * If the contents fail validation then the box is painted red and the value becomes some negative number.
  * 
  * @author gp
  */
@@ -23,8 +22,8 @@ public class JBytesBox extends JTextField implements KeyListener {
 	public static Color good = new Color(200, 255, 200);
 	public static Color bad = new Color(255, 200, 100);
 	
-	/*
-	 * Returns the value represented by this box in bytes.
+	/**
+	 * Returns the value represented by this box in bytes. Will be negative if the value in the box is not valid.
 	 */
 	public long getValue() {
 		return currentValue;
@@ -53,6 +52,7 @@ public class JBytesBox extends JTextField implements KeyListener {
 		} else {
 			setBackground(good);
 		}
+		if (oldValue == -1) currentValue = -2; //ensure invalid changes always issue an event.
 		firePropertyChange("value", oldValue, currentValue); //
 	}
 

@@ -2,6 +2,7 @@ package client.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -337,6 +338,7 @@ public class FilesTab extends TabItem implements 	ActionListener,
 		browseTree.expandPath(fs.getBrowseRoot().getPath());
 		
 		JScrollPane treeView = new JScrollPane(browseTree);
+		treeView.setMinimumSize(new Dimension(100, 100));
 		splitPane.setLeftComponent(treeView);
 		
 		filesTable = new FancierTable(fs, frame.gui.conf, CK.FILES_TABLE_COLWIDTHS);

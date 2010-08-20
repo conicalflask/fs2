@@ -1,13 +1,19 @@
 package client.gui.settings;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.HashMap;
 
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 
 import client.gui.MainFrame;
 import client.gui.MainFrame.StatusHint;
@@ -32,6 +38,34 @@ public abstract class SettingsPanel extends JPanel implements MouseListener {
 		this.icon = icon;
 		
 		setLayout(new BorderLayout());
+		setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+	}
+	
+
+	/**
+	 * Returns a panel that will autoscroll but otherwise behave like a box-layouted panel. (it is added to the settingspanel already)
+	 * @return
+	 */
+	protected JPanel createScrollableBoxlayout() {
+		//setup a scrollable multipanel area:
+		JPanel inner = new JPanel(new BorderLayout());
+		JPanel boxes = new JPanel();
+		boxes.setLayout(new BoxLayout(boxes, BoxLayout.PAGE_AXIS));
+		inner.add(boxes, BorderLayout.NORTH);
+		JScrollPane sp = new JScrollPane(inner);
+		sp.setAutoscrolls(true);
+		sp.setBorder(BorderFactory.createEmptyBorder());
+		add(sp);
+		return boxes;
+	}
+	
+	/**
+	 * Gets a 'control group' looking border for a jpanel.
+	 * @param text
+	 * @return
+	 */
+	protected Border getTitledBoldBorder(String text) {
+		return BorderFactory.createTitledBorder(null, text, TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, getFont().deriveFont(Font.BOLD));
 	}
 	
 	/**

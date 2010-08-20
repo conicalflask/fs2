@@ -2,21 +2,32 @@ package client.gui.settings;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.RescaleOp;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
+import javax.swing.JSpinner.DefaultEditor;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
+import common.FS2Constants;
 import common.Logger;
 import common.Util;
 
@@ -32,33 +43,119 @@ public class AdvancedSettings extends SettingsPanel {
 	public AdvancedSettings(MainFrame frame) {
 		super(frame, "Advanced", frame.getGui().getUtil().getImage("advanced"));
 		
-		JPanel inner = new JPanel(new BorderLayout());
-		
-		//Construct a basic settings page including: alias, avatar, etc.
-		JPanel boxes = new JPanel();
-		boxes.setLayout(new BoxLayout(boxes, BoxLayout.PAGE_AXIS));
+		JPanel boxes = createScrollableBoxlayout();
 		
 		//###### actual items go here:
 		JLabel warning = new JLabel("<html>\"<b>You're probably going to break anything you change here</b>\"<br><i>--Captain Obvious</i></html>", frame.getGui().getUtil().getImage("failure"), SwingConstants.LEFT);
 		warning.setAlignmentX(CENTER_ALIGNMENT);
 		boxes.add(warning);
-		boxes.add(new JSeparator());
+		boxes.add(createSlotsPanel());
 		boxes.add(heapSizePanel());
-		boxes.add(new JSeparator());
+		boxes.add(portPanel());
 		boxes.add(resetToDefaultsPanel());
 		//###### no more items.
 		
-		inner.add(boxes, BorderLayout.NORTH);
-		
-		JScrollPane sp = new JScrollPane(inner);
-		sp.setAutoscrolls(true);
-		sp.setBorder(BorderFactory.createEmptyBorder());
-		add(sp);
 	}
 
+	private JPanel createSlotsPanel() {
+		JPanel ret = new JPanel(new BorderLayout());
+		ret.setBorder(getTitledBoldBorder("Transfer slots"));
+		
+		JPanel inner = new JPanel();
+		ret.add(inner, BorderLayout.NORTH);
+		
+		inner.setLayout(new BoxLayout(inner, BoxLayout.PAGE_AXIS));
+		
+		inner.add(doUploadSlotsSection());
+		inner.add(doDownloadSlotsSection());
+		
+		return ret;
+	}
+
+	private JPanel doUploadSlotsSection() {
+		JPanel upload = new JPanel();
+		upload.setLayout(new BoxLayout(upload, BoxLayout.X_AXIS));
+		upload.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+		
+		final JSpinner upMaxSlots = new JSpinner(new SpinnerNumberModel(frame.getGui().getShareServer().getUploadSlots(), 1, Integer.MAX_VALUE, 1));
+		final JSpinner upMaxSlotsPerClient = new JSpinner(new SpinnerNumberModel(frame.getGui().getShareServer().getUploadSlotsPerUser(), 1, Integer.MAX_VALUE, 1));
+		
+		upMaxSlots.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				frame.getGui().getShareServer().setUploadSlots((Integer)upMaxSlots.getValue());
+			}
+		});
+		upMaxSlotsPerClient.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				frame.getGui().getShareServer().setUploadSlotsPerUser((Integer)upMaxSlotsPerClient.getValue());
+			}
+		});
+		
+		registerHint(upMaxSlots, new StatusHint(frame.getGui().getUtil().getImage("upload"), "The maximum number of concurrent uploads"));
+		registerHint(upMaxSlotsPerClient, new StatusHint(frame.getGui().getUtil().getImage("upload"), "The number of slots a single peer can use at once"));
+		
+		((DefaultEditor) upMaxSlots.getEditor()).getTextField().setColumns(3);
+		((DefaultEditor) upMaxSlotsPerClient.getEditor()).getTextField().setColumns(3);
+		
+		JLabel uploadl = new JLabel("<html><b>Upload:</b></html>");
+		uploadl.setBorder(BorderFactory.createEmptyBorder(0,0,0,5));
+		upload.add(uploadl);
+		upload.add(upMaxSlots);
+		upload.add(new JLabel("   per user:"));
+		upload.add(upMaxSlotsPerClient);
+		
+		JPanel lefter = new JPanel(new BorderLayout());
+		lefter.add(upload, BorderLayout.WEST);
+		return lefter;
+	}
+	
+	private JPanel doDownloadSlotsSection() {
+		JPanel dl = new JPanel();
+		dl.setLayout(new BoxLayout(dl, BoxLayout.X_AXIS));
+		dl.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+		
+		final JSpinner downMaxSlots = new JSpinner(new SpinnerNumberModel(frame.getGui().getDc().getDownloadSlots(), 1, Integer.MAX_VALUE, 1));
+		final JSpinner downMaxParts = new JSpinner(new SpinnerNumberModel(frame.getGui().getDc().getMaxSlotsPerFile(), 1, Integer.MAX_VALUE, 1));
+		
+		downMaxSlots.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				frame.getGui().getDc().setDownloadSlots((Integer)downMaxSlots.getValue());
+			}
+		});
+		downMaxParts.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				frame.getGui().getDc().setMaxSlotsPerFile((Integer)downMaxParts.getValue());
+			}
+		});
+		
+		registerHint(downMaxSlots, new StatusHint(frame.getGui().getUtil().getImage("download"), "The maximum number of concurrent downloads"));
+		registerHint(downMaxParts, new StatusHint(frame.getGui().getUtil().getImage("download"), "The maximum number of chunks a single file can be split into for downloading."));
+		
+		((DefaultEditor) downMaxSlots.getEditor()).getTextField().setColumns(3);
+		((DefaultEditor) downMaxParts.getEditor()).getTextField().setColumns(3);
+		
+		JLabel dll = new JLabel("<html><b>Download:</b></html>");
+		dll.setBorder(BorderFactory.createEmptyBorder(0,0,0,5));
+		dl.add(dll);
+		dl.add(downMaxSlots);
+		dl.add(new JLabel("   per file:"));
+		dl.add(downMaxParts);
+		
+		JPanel lefter = new JPanel(new BorderLayout());
+		lefter.add(dl, BorderLayout.WEST);
+		return lefter;
+	}
+	
+	JLabel heapInfo = new JLabel();
+	Timer heapInfoTimer;
 	private JPanel heapSizePanel() {
 		JPanel content = new JPanel();
-		content.setLayout(new BoxLayout(content, BoxLayout.X_AXIS));
+		content.setLayout(new BorderLayout());
+		content.setBorder(getTitledBoldBorder("Maximum heap size"));
 		
 		//Runtime.getRuntime().maxMemory()<(conf.getLong(CK.HEAPSIZE)*0.9
 		final JBytesBox heapsize = new JBytesBox(frame.getGui().getConf().getLong(CK.HEAPSIZE));
@@ -67,33 +164,98 @@ public class AdvancedSettings extends SettingsPanel {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				long nv = (Long) evt.getNewValue();
-				if (nv==-1) {
-					frame.setStatusHint(new StatusHint(SettingsTab.error, "FS2's heap size can't be set to '"+heapsize.getText()+"'."));
+				if (nv<0) {
+					frame.setStatusHint(new StatusHint(SettingsTab.ERROR, "FS2's heap size can't be set to '"+heapsize.getText()+"'."));
 				} else {
 					if (nv > 32*1024*1024) {
 						frame.getGui().getConf().putLong(CK.HEAPSIZE, nv);
-						frame.setStatusHint(new StatusHint(SettingsTab.tick, "FS2's heap set to "+Util.niceSize(nv)+", click 'Restart FS2' to apply changes"));
+						frame.setStatusHint(new StatusHint(SettingsTab.TICK, "FS2's heap set to "+Util.niceSize(nv)+", click 'Restart FS2' to apply changes"));
 						frame.getGui().getConf().putBoolean(CK.AUTO_HEAP_KNOWLEDGE, true); //suppress the "i've changed your heap for you" message.
 						restartNeeded();
 					} else {
-						frame.setStatusHint(new StatusHint(SettingsTab.error, "The heap must be at least 32MiB."));
+						frame.setStatusHint(new StatusHint(SettingsTab.ERROR, "The heap must be at least 32MiB."));
 					}
 				}
 			}
 		});
 		
-		content.add(new JLabel("<html>Active JVM maximum heap size: <b>"+Util.niceSize(Runtime.getRuntime().maxMemory())+"</b><br>" +
-							         "Current heap usage: <b>"+Util.niceSize(Runtime.getRuntime().totalMemory())+"</b><br>" +
-							         "Configured maximum heap size:"));
-		content.add(heapsize);
 		
-		registerHint(heapsize, new StatusHint(SettingsTab.tick, "Set this to several GiB to host a large indexnode."));
+		content.add(heapInfo, BorderLayout.WEST);
+		setHeapInfo();
+		heapInfo.setBorder(BorderFactory.createEmptyBorder(0,0,0,5));
+		content.add(heapsize, BorderLayout.CENTER);
+		
+		heapInfoTimer = new Timer(5000, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				setHeapInfo();
+			}
+		});
+		heapInfoTimer.start();
+		
+		JButton gc = new JButton(frame.getGui().getUtil().getImage("gc"));
+		gc.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.gc();
+				setHeapInfo();
+			}
+		});
+		content.add(gc, BorderLayout.EAST);
+		
+		registerHint(heapsize, new StatusHint(SettingsTab.TICK, "Set this to several GiB to host a large indexnode."));
+		registerHint(gc, new StatusHint(frame.getGui().getUtil().getImage("gc"), "Triggers a garbage collection now."));
 		
 		return content;
 	}
 	
+	private void setHeapInfo() {
+		heapInfo.setText("<html>Active JVM maximum heap size: <b>"+Util.niceSize(Runtime.getRuntime().maxMemory())+"</b><br>" +
+		         "Current heap usage: <b>"+Util.niceSize(Runtime.getRuntime().totalMemory())+"</b><br>" +
+		         "Configured maximum heap size:");
+	}
+	
+	JLabel portNumberInfo = new JLabel();
 	private JPanel portPanel() {
-		return null;
+		JPanel ppanel = new JPanel(new BorderLayout());
+		ppanel.setBorder(getTitledBoldBorder("Client port"));
+		
+		final JSpinner port = new JSpinner(new SpinnerNumberModel(frame.getGui().getConf().getInt(CK.PORT), 1, Integer.MAX_VALUE, 1));
+		
+		port.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				frame.getGui().getConf().putInt(CK.PORT, ((Integer)port.getValue()));
+				setPortNumberInfo();
+				restartNeeded();
+			}
+		});
+		
+		registerHint(port, new StatusHint(null, "The port that FS2 listens on. (port+1 is also used!)"));
+		
+		((DefaultEditor) port.getEditor()).getTextField().setColumns(7);
+		JPanel portShrinker = new JPanel(new BorderLayout());
+		portShrinker.add(port, BorderLayout.WEST);
+		
+		ppanel.add(portNumberInfo, BorderLayout.NORTH);
+		ppanel.add(portShrinker, BorderLayout.CENTER);
+		setPortNumberInfo();
+		
+		return ppanel;
+	}
+	
+	private void setPortNumberInfo() {
+		ArrayList<String> ports = new ArrayList<String>();
+		ports.add(frame.getGui().getConf().getString(CK.PORT));
+		ports.add(Integer.toString(frame.getGui().getConf().getInt(CK.PORT)+1));
+		ports.add(Integer.toString(FS2Constants.ADVERTISMENT_DATAGRAM_PORT));
+		ports.add(Integer.toString(FS2Constants.ADVERTISMENT_DATAGRAM_PORT+1));
+		if (frame.getGui().getInternalIndexnode().isCurrentlyActive()) {
+			ports.add(Integer.toString(frame.getGui().getInternalIndexnode().getPort()));
+			ports.add(Integer.toString(frame.getGui().getInternalIndexnode().getPort()+1));
+		}
+		
+		portNumberInfo.setText("<html>FS2 is currently using ports: <b>"+Util.join(ports.toArray(), ", ")+"</b><br>Open these ports on your firewall to use FS2</html>");
 	}
 	
 	/**
@@ -109,17 +271,22 @@ public class AdvancedSettings extends SettingsPanel {
 	private void restartNeeded() {
 		restartFS2.setText(restartFS2.getText().toUpperCase());
 		restartFS2.setBackground(JBytesBox.bad);
+		buttonsPanel.setBackground(JBytesBox.bad);
+		restartFS2.setFont(restartFS2.getFont().deriveFont(Font.BOLD|Font.ITALIC));
+		((TitledBorder)buttonsPanel.getBorder()).setTitle("You need to restart FS2 to apply the changes!");
 	}
 	
-	JButton resetFS2;
-	JButton restartFS2; //clicking this restarts the FS2 client.
-	
+	private JButton resetFS2;
+	private JButton restartFS2; //clicking this restarts the FS2 client.
+	private JPanel buttonsPanel;
 	/**
 	 * A single button that nukes FS2's configuration, and a button to relaunch FS2.
 	 * @return
 	 */
 	private JPanel resetToDefaultsPanel() {
-		JPanel buttonsPanel = new JPanel(new FlowLayout());
+		buttonsPanel = new JPanel(new FlowLayout());
+		buttonsPanel.setBorder(getTitledBoldBorder("Reset controls"));
+		((FlowLayout)buttonsPanel.getLayout()).setAlignment(FlowLayout.LEFT);
 		
 		restartFS2 = new JButton("Restart FS2", frame.getGui().getUtil().getImage("refresh"));
 		restartFS2.addActionListener(new ActionListener() {

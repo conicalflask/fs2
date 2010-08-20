@@ -103,7 +103,7 @@ public class ShareSettings extends SettingsPanel {
 				setIcon(spinner.spinner);
 				break;
 			case ERROR:
-				setIcon(SettingsTab.error);
+				setIcon(SettingsTab.ERROR);
 				break;
 			default:
 				setIcon(null);
@@ -190,11 +190,11 @@ public class ShareSettings extends SettingsPanel {
 				inBackground.setName("GUI bg: adding share");
 				inBackground.start();
 				
-				frame.setStatusHint(new StatusHint(SettingsTab.tick, "Share added! (may take a little while to appear if the file list needs loading!)"));
+				frame.setStatusHint(new StatusHint(SettingsTab.TICK, "Share added! (may take a little while to appear if the file list needs loading!)"));
 			} catch (Exception ex) {
 				Logger.log("Exception adding share: "+e);
 				ex.printStackTrace();
-				frame.setStatusHint(new StatusHint(SettingsTab.error, "Share couldn't be added!"));
+				frame.setStatusHint(new StatusHint(SettingsTab.ERROR, "Share couldn't be added!"));
 			}
 		}
 	}

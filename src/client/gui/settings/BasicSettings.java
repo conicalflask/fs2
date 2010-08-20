@@ -1,6 +1,7 @@
 package client.gui.settings;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -15,13 +16,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -43,21 +45,29 @@ public class BasicSettings extends SettingsPanel implements KeyListener {
 		super(frame, "Basic", frame.getGui().getUtil().getImage("basic"));
 		
 		//Construct a basic settings page including: alias, avatar, etc.
-		JPanel boxes = new JPanel();
-		boxes.setLayout(new BoxLayout(boxes, BoxLayout.PAGE_AXIS));
-		
+		JPanel boxes = createScrollableBoxlayout();
 		boxes.add(createAliasPanel());
-		boxes.add(new JSeparator());
 		boxes.add(createDDPanel());
-		boxes.add(new JSeparator());
-		boxes.add(createUploadSpeedPanel());
-		boxes.add(createDownloadSpeedPanel());
+		boxes.add(createSpeedsPanel());
 		
-		add(boxes, BorderLayout.NORTH);
 	}
 
+	private JPanel createSpeedsPanel() {
+		JPanel panel0 = new JPanel();
+		panel0.setLayout(new BoxLayout(panel0, BoxLayout.PAGE_AXIS));
+		
+		panel0.setBorder(getTitledBoldBorder("Maximum transfer speeds"));
+		
+		panel0.add(createUploadSpeedPanel());
+		panel0.add(createDownloadSpeedPanel());
+		
+		return panel0;
+	}
+	
 	private JPanel createUploadSpeedPanel() {
 		JPanel content = new JPanel();
+		content.setBorder(BorderFactory.createEmptyBorder(0,0,5,0));
+		
 		content.setLayout(new BoxLayout(content, BoxLayout.X_AXIS));
 		
 		final JBytesBox speed = new JBytesBox(frame.getGui().getShareServer().getUploadSpeed());
@@ -66,19 +76,19 @@ public class BasicSettings extends SettingsPanel implements KeyListener {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				long nv = (Long) evt.getNewValue();
-				if (nv==-1) {
-					frame.setStatusHint(new StatusHint(SettingsTab.error, "The upload speed can't be set to '"+speed.getText()+"'."));
+				if (nv<=0) {
+					frame.setStatusHint(new StatusHint(SettingsTab.TICK, "The upload speed can't be set to '"+speed.getText()+"'."));
 				} else {
 					frame.getGui().getShareServer().setUploadSpeed(nv);
-					frame.setStatusHint(new StatusHint(SettingsTab.error, "The upload speed has been set to "+Util.niceSize(nv)));
+					frame.setStatusHint(new StatusHint(SettingsTab.TICK, "The upload speed has been set to "+Util.niceSize(nv)));
 				}
 			}
 		});
 		
-		content.add(new JLabel("Maximum upload per second:"));
+		content.add(new JLabel("Upload:     "));
 		content.add(speed);
 		
-		registerHint(speed, new StatusHint(SettingsTab.tick, "(saved on change) The maximum upload amount per second, examples: 5.5mb, 10b, 999tib"));
+		registerHint(speed, new StatusHint(SettingsTab.TICK, "(saved on change) The maximum upload amount per second, examples: 5.5mb, 10b, 999tib"));
 		
 		return content;
 	}
@@ -93,26 +103,27 @@ public class BasicSettings extends SettingsPanel implements KeyListener {
 			@Override
 			public void propertyChange(PropertyChangeEvent evt) {
 				long nv = (Long) evt.getNewValue();
-				if (nv==-1) {
-					frame.setStatusHint(new StatusHint(SettingsTab.error, "The download speed can't be set to '"+speed.getText()+"'."));
+				if (nv<0) {
+					frame.setStatusHint(new StatusHint(SettingsTab.ERROR, "The download speed can't be set to '"+speed.getText()+"'."));
 				} else {
 					frame.getGui().getDc().setDownloadSpeed(nv);
-					frame.setStatusHint(new StatusHint(SettingsTab.error, "The download speed has been set to "+Util.niceSize(nv)));
+					frame.setStatusHint(new StatusHint(SettingsTab.ERROR, "The download speed has been set to "+Util.niceSize(nv)));
 				}
 			}
 		});
 		
-		content.add(new JLabel("Maximum download per second:"));
+		content.add(new JLabel("Download: "));
 		content.add(speed);
 		
-		registerHint(speed, new StatusHint(SettingsTab.tick, "(saved on change) The maximum download amount per second, examples: 5.5mb, 10b, 999tib"));
+		registerHint(speed, new StatusHint(SettingsTab.TICK, "(saved on change) The maximum download amount per second, examples: 5.5mb, 10b, 999tib"));
 		
 		return content;
 	}
 	
 	private JPanel createDDPanel() {
 		final JButton downloadDirectory;
-		downloadDirectory = new JButton("Default download directory: "+frame.getGui().getDc().getDefaultDownloadDirectory(), frame.getGui().getUtil().getImage("type-dir"));
+		final JLabel currentLocation = new JLabel(frame.getGui().getDc().getDefaultDownloadDirectory().getPath());
+		downloadDirectory = new JButton("<html><b>Browse</b></html>", frame.getGui().getUtil().getImage("type-dir"));
 		downloadDirectory.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -122,13 +133,18 @@ public class BasicSettings extends SettingsPanel implements KeyListener {
 				if (retVal==JFileChooser.APPROVE_OPTION) {
 					frame.getGui().getDc().setDefaultDownloadDirectory(fc.getSelectedFile());
 					frame.getGui().getShareServer().defaultDownloadDirectoryChanged(fc.getSelectedFile()); //change the "My Downloads" share if it still exists.
-					downloadDirectory.setText("Default download directory: "+frame.getGui().getDc().getDefaultDownloadDirectory());
+					currentLocation.setText(frame.getGui().getDc().getDefaultDownloadDirectory().getPath());
 				}
 			}
 		});
-		JPanel ddPanel = new JPanel();
-		ddPanel.add(downloadDirectory);
 		
+		JPanel ddPanel = new JPanel(new BorderLayout());
+		ddPanel.setBorder(getTitledBoldBorder("Default download directory"));
+		JPanel panel0 = new JPanel();
+		ddPanel.add(panel0, BorderLayout.WEST);
+		ddPanel.add(currentLocation, BorderLayout.NORTH);
+		currentLocation.setAlignmentX(LEFT_ALIGNMENT);
+		panel0.add(downloadDirectory);
 		registerHint(downloadDirectory, new StatusHint(frame.getGui().getUtil().getImage("type-dir"), "This is where your downloads will go to by default"));
 		
 		return ddPanel;
@@ -138,14 +154,21 @@ public class BasicSettings extends SettingsPanel implements KeyListener {
 	private JTextField aliasText;
 	private JPanel createAliasPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
+		panel.setBorder(getTitledBoldBorder("Alias and Avatar"));
+		
 		JPanel panel0 = new JPanel(new BorderLayout());
 		panel.add(panel0, BorderLayout.NORTH);
 		
-		JLabel aliasLabel = new JLabel("Alias: ");
-		panel0.add(aliasLabel, BorderLayout.WEST);
-		
 		aliasText = new JTextField();
-		panel0.add(aliasText, BorderLayout.CENTER);
+		JPanel panel1 = new JPanel();
+		panel1.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+		
+		panel1.setLayout(new BoxLayout(panel1, BoxLayout.PAGE_AXIS));
+		panel1.add(new Box.Filler(new Dimension(2, 2), new Dimension(2, 2), new Dimension(2, 200)));	//enable the slack space to be taken in.s
+		panel1.add(aliasText);
+		aliasText.setMaximumSize(new Dimension(aliasText.getMaximumSize().width, aliasText.getMinimumSize().height)); //fix to be the correct height.
+		panel1.add(new Box.Filler(new Dimension(2, 2), new Dimension(2, 2), new Dimension(2, 200)));
+		panel0.add(panel1, BorderLayout.CENTER);
 		aliasText.setDocument(new JTextFieldLimit(32));
 		aliasText.setText(frame.getGui().getShareServer().getAlias());
 		aliasText.addKeyListener(this);
@@ -171,10 +194,9 @@ public class BasicSettings extends SettingsPanel implements KeyListener {
 			}
 		});
 		
-		panel0.add(avatarButton, BorderLayout.EAST);
+		panel0.add(avatarButton, BorderLayout.WEST);
 		
 		registerHint(aliasText, new StatusHint(frame.getGui().getUtil().getImage("tick"), "(saved on change) Set your alias on the FS2 network here."));
-		registerHint(aliasLabel, new StatusHint(frame.getGui().getUtil().getImage("tick"), "(saved on change) Set your alias on the FS2 network here."));
 		registerHint(avatarButton, new StatusHint(frame.getGui().getUtil().getImage("type-image"), "Click this button to set your avatar"));
 		
 		return panel;

@@ -12,6 +12,7 @@ import client.ClientExecutor;
 import client.CriticalFailureHandler;
 import client.gui.SingleInstanceDetector.InstanceNotifiable;
 import client.indexnode.downloadcontroller.DownloadController;
+import client.indexnode.internal.InternalIndexnodeManager;
 import client.platform.Platform;
 import client.platform.ClientConfigDefaults.CK;
 import client.shareserver.ShareServer;
@@ -40,6 +41,11 @@ public class Gui {
 	ShareServer ssvr;
 	Utilities util = new Utilities();
 	DownloadController dc;
+	private InternalIndexnodeManager iim;
+	
+	public InternalIndexnodeManager getInternalIndexnode() {
+		return iim;
+	}
 	
 	public Utilities getUtil() {
 		return util;
@@ -71,6 +77,8 @@ public class Gui {
 		this.ssvr = ssvr;
 		
 		this.dc = dc;
+		
+		this.iim = new InternalIndexnodeManager();
 		
 		sid.addNotifiable(new NewInstanceDetector());
 		mainFrame = new MainFrame(this);
