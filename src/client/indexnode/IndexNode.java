@@ -72,7 +72,6 @@ public class IndexNode {
 	private String passwordMD5 = "";
 	
 	private String alias = "unknown";
-	private boolean permanent = false;
 	private Timer utilityTimer = new Timer("Indexnode utility timer (ping & chat & stats)", true);
 	private PingTimerTask ping;
 	private ShareServer ssvr;
@@ -84,10 +83,6 @@ public class IndexNode {
 	String confKey = "";
 	int lastId = -1;
 	long advertuid;
-	
-	public boolean isPermanent() {
-		return permanent;
-	}
 	
 	private class PingTimerTask extends TimerTask {
 		@Override
@@ -130,9 +125,8 @@ public class IndexNode {
 		
 		if (wasAdvertised()) {
 			Logger.log("An indexnode at '"+getLocation()+"' was just autodetected...");
-		} else {
-			permanent = true;
 		}
+		
 		// (even if the indexnode is uncontactable we still want to poll it periodically)
 		resetPingTimer();
 		//setup a recurring task to check for new messages: (and check now)
@@ -311,20 +305,6 @@ public class IndexNode {
 	}
 	
 	/**
-	 * Sets whether this node is a permanent indexnode. (one that is stored in the config file, and is always attempted to contact)
-	 * @param value
-	 */
-	public void setPermanent(boolean value) {
-		permanent = value;
-		if (value) {
-			ssvr.getIndexNodeCommunicator().conf.putString(confKey+"/path", location.toString());
-			ssvr.getIndexNodeCommunicator().conf.putString(confKey+"/password", passwordMD5);
-		} else {
-			ssvr.getIndexNodeCommunicator().conf.deleteKey(confKey);
-		}
-	}
-	
-	/**
 	 * Provided with a new MD5'd password string this will save it to the config file and reconsider being secure with the indexnode.
 	 * You should rate-limit calls to this method as it will necessarily contact the indexnode several times. (only if we're already in secure mode though)
 	 * @param passwordMD5
@@ -431,7 +411,7 @@ public class IndexNode {
 			
 			resetPingTimer();
 			lastSeen = new Date();
-			ssvr.getIndexNodeCommunicator().notifyIndexNodeChanged(ssvr.getIndexNodeCommunicator().getRegisteredIndexNodes().indexOf(this));
+			notifyGui();
 			if (status==Status.FIREWALLED) setStatus(Status.ACTIVE); //promote to active if they can now contact us.
 			return true;
 		}
@@ -604,10 +584,24 @@ public class IndexNode {
 	private void setStatus(Status status) {
 		if (this.status!=status) {
 			this.status = status;
+			
+			if (status == Status.UNCONTACTABLE && wasAdvertised()) { //remove the indexnode from the list altogether.
+				ssvr.getIndexNodeCommunicator().deregisterIndexNode(this);
+			}
+			
 			if (status==Status.INCOMPATIBLE && ping!=null) ping.cancel(); //dont retry continuously for an incompatible indexnode.
 			Logger.log("Indexnode '"+getName()+"' just became "+status);
-			if (status!=Status.SHUTDOWN) ssvr.getIndexNodeCommunicator().notifyIndexNodeChanged(ssvr.getIndexNodeCommunicator().getRegisteredIndexNodes().indexOf(this));
+			if (status!=Status.SHUTDOWN) {
+				notifyGui();
+			}
 		}
+	}
+
+	/**
+	 * Allows the notification of gui elements that something non-structural has changed. (ie a status or alias has changed)
+	 */
+	private void notifyGui() {
+		ssvr.getIndexNodeCommunicator().notifyIndexNodeChanged(ssvr.getIndexNodeCommunicator().getRegisteredIndexNodes().indexOf(this));
 	}
 
 	/**
@@ -702,6 +696,7 @@ public class IndexNode {
 			if (newAlias!=null && !newAlias.equals(alias)) {
 				Logger.log("The indexnode at "+getActiveLocation().toString()+" is now known as '"+newAlias+"'");
 				alias = newAlias;
+				notifyGui();
 			}
 			
 			int status = conn.getResponseCode();

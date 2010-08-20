@@ -86,26 +86,13 @@ public class AdvertListener extends Thread {
 					
 					if (mustShutdown) return;
 					
-					//Don't register this if we are already connected to it, this is determined by advertuids:
-					boolean register = true;
-					synchronized (indexcomms.getRegisteredIndexNodes()) {
-						for (IndexNode node : indexcomms.getRegisteredIndexNodes()) {
-							if (node.getAdvertuid()==advertuid) {
-								register = false;
-								break;
-							}
-						}
-					}
-					
-					if (register) {
-						indexcomms.registerNewIndexNode(url, advertuid);
-					}
+					indexcomms.advertRecieved(url, advertuid);
 					
 				} finally {
-					try { Thread.sleep(FS2Constants.INDEXNODE_ADVERTISE_INTERVAL_MS); } catch (InterruptedException dontcare) {}
 					if (mustShutdown) return;
 				}
 			} catch (Exception e){
+				try { Thread.sleep(FS2Constants.INDEXNODE_ADVERTISE_INTERVAL_MS); } catch (InterruptedException dontcare) {}
 				Logger.warn("Advertisment reception failed: "+e.toString());
 				e.printStackTrace();
 			}

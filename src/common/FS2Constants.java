@@ -108,7 +108,7 @@ public class FS2Constants {
 	
 	public static final String CLIENT_LOGS_SUBDIRECTORY = "logs";
 	
-	/**How long the client waits for the indexnode to ping before re-announcing itself (2m)*/
+	/**How long the client waits for the indexnode to ping before re-announcing itself (twice indexnode ping interval)*/
 	public static final int CLIENT_PING_WAIT_TIMEOUT_MS = 2*INDEXNODE_PING_CLIENT_INTERVAL_MS;
 	
 	/** How long does a download have to be active before being split? in milliseconds*/

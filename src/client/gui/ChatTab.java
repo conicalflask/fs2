@@ -3,35 +3,19 @@ package client.gui;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import common.FS2Constants;
-import common.Logger;
-import common.Util;
 
 import client.gui.chat.NodeChatTab;
 import client.indexnode.IndexNode;
 import client.indexnode.IndexNodeCommunicator;
-import client.platform.Platform;
 import client.platform.ClientConfigDefaults.CK;
 
 /**
@@ -54,102 +38,14 @@ public class ChatTab extends TabItem implements TableModelListener {
 		add(createPreferencesPane(), BorderLayout.PAGE_START);
 		add(createChatPane());
 	}
-	JButton avatarButton;
 	JCheckBox displayNotificationsCheck;
 	private Boolean displayNotifications = false;
 	public Boolean displayChatNotifications(){
 		return displayNotifications;
 	}
 	
-	private File lastUsedIconPath;
-	
-	private void setIcon() {
-		JFileChooser iconPicker = new JFileChooser(lastUsedIconPath);
-		FileNameExtensionFilter filter = new FileNameExtensionFilter("Images", "jpg", "gif", "jpeg", "png", "tiff", "bmp");
-		iconPicker.setFileFilter(filter);
-		int result = iconPicker.showOpenDialog(this);
-		if(result == JFileChooser.APPROVE_OPTION) {
-			try {
-				lastUsedIconPath = iconPicker.getCurrentDirectory();
-				InputStream fis = null;
-				try {
-					fis = new BufferedInputStream(new FileInputStream(iconPicker.getSelectedFile()));
-		    		final BufferedImage chosen = Util.processImageInternal(fis, FS2Constants.FS2_AVATAR_ICON_SIZE, FS2Constants.FS2_AVATAR_ICON_SIZE, Util.ImageResizeType.OUTER); //resize to appropriate dimensions.
-		    		avatarButton.setText("Sending...");
-		    		avatarButton.setEnabled(false);
-		    		avatarButton.setIcon(new ImageIcon(chosen));
-		    		
-		    		Thread worker = new Thread(new Runnable() {
-						@Override
-						public void run() {
-							boolean success;
-							IOException ex = null;
-							try {
-								//1) save the resized image to a cache file:
-								File avatarCache = Platform.getPlatformFile("avatar.png");
-								ImageIO.write(chosen, "png", avatarCache);
-								
-								//2) set the indexnode comm to use this file:
-								frame.gui.ssvr.getIndexNodeCommunicator().setAvatarFile(avatarCache);
-							
-								success = true;
-							} catch (IOException e) {
-								ex = e;
-								success = false;
-								Logger.warn("Couldn't send avatar to indexnode: "+e);
-							}
-							
-						    final boolean esuccess = success;
-						    final IOException eex = ex;
-							
-				    		Utilities.edispatch(new Runnable() {
-								@Override
-								public void run() {
-									if (esuccess) {
-										avatarButton.setText("");
-									} else {
-										avatarButton.setText("failure: "+eex);
-									}
-						    		avatarButton.setEnabled(true);
-								}
-							});
-						}
-					});
-		    		worker.setName("avatar change submitter");
-		    		worker.start();
-				} finally {
-					if (fis!=null) fis.close();
-				}
-			} catch (Exception ex) {
-				Logger.warn("Couldn't load a selected avatar: "+ex);
-				avatarButton.setText(iconPicker.getSelectedFile().getName()+" can't be loaded.");
-			}
-		}
-	}
-	
 	private JPanel createPreferencesPane() {
 		JPanel preferencesPane = new JPanel(new BorderLayout());
-		
-		ImageIcon ico = null;
-		File avatarFile = frame.gui.ssvr.getIndexNodeCommunicator().getAvatarFile();
-		if (avatarFile.isFile()) {
-			try {
-				ico = new ImageIcon(ImageIO.read(avatarFile));
-			} catch (IOException e) {
-				Logger.warn("Avatar "+avatarFile.getPath()+" couldn't be loaded from disk: "+ e);
-				ico = frame.gui.util.getImage("defaultavatar");
-			}
-		} else {
-			ico = frame.gui.util.getImage("defaultavatar");
-		}
-		
-		avatarButton = new JButton("Select avatar", ico); //TODO: get current avatar from the indexnode communicator.
-		avatarButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				setIcon();
-			}
-		});
 		
 		displayNotificationsCheck = new JCheckBox("Display chat notifications");
 		displayNotificationsCheck.addActionListener(new ActionListener() {
@@ -168,7 +64,6 @@ public class ChatTab extends TabItem implements TableModelListener {
 		displayNotifications = frame.getGui().getConf().getBoolean(CK.DISPLAY_CHAT_NOTIFICATIONS);
 		displayNotificationsCheck.setSelected(displayNotifications);
 		
-		preferencesPane.add(avatarButton, BorderLayout.LINE_START);  //FIXME: this is fugly!
 		preferencesPane.add(displayNotificationsCheck, BorderLayout.LINE_END);
 		
 		

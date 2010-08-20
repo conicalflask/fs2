@@ -190,7 +190,7 @@ public class Notifications {
 	}
 	
 	public void heapSizeReminder() {
-		if (System.getProperty("increasedheap")!=null) oneTimeReminder(CK.AUTO_HEAP_KNOWLEDGE, "FS2 has automatically increased its maximum java heap size to "+Util.niceSize(Runtime.getRuntime().maxMemory())+".\nYou can change FS2's mnaximum heap size in the advanced settings.");
+		if (System.getProperty("increasedheap")!=null) oneTimeReminder(CK.AUTO_HEAP_KNOWLEDGE, "FS2 has automatically increased its maximum java heap size to "+Util.niceSize(Runtime.getRuntime().maxMemory())+".\nYou can change FS2's maximum heap size in the advanced settings.");
 	}
 	
 	public void oneTimeReminder(String configurationKey, String message) {

@@ -70,6 +70,7 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		public static final String UPLOADS_COLWIDTHS = "gui/uploads_table_columnwidths/col";
 		public static final String SETTINGS_COLWIDTHS = "gui/settings_list_columnwidths/col";
 		public static final String SETTINGS_DIVIDER_LOCATION = "gui/settings_divider_location";
+		public static final String SETTINGS_ACTIVE_PANEL = "gui/settings_active_page";
 	}
 	
 	protected HashMap<String, String> defaults = new HashMap<String, String>();
@@ -150,6 +151,8 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		
 		defaults.put(CK.DISPLAY_CHAT_NOTIFICATIONS, Boolean.FALSE.toString());
 		comments.put(CK.DISPLAY_CHAT_NOTIFICATIONS, "when true notifications will be displayed each time a chat message is received.");
+		
+		defaults.put(CK.SETTINGS_ACTIVE_PANEL, "BasicSettings");
 		
 		defaults.put(CK.LOOK_AND_FEEL, UIManager.getSystemLookAndFeelClassName());
 	}

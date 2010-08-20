@@ -7,6 +7,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -33,11 +34,14 @@ import client.platform.ClientConfigDefaults.CK;
 public class SettingsTab extends TabItem implements PropertyChangeListener,
 													ListSelectionListener {
 
-	ArrayList<SettingsPanel> settings = new ArrayList<SettingsPanel>();
-	JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-	CardLayout cards = new CardLayout();
-	JPanel rightHand;
-	FancierTable ft;
+	private ArrayList<SettingsPanel> settings = new ArrayList<SettingsPanel>();
+	private JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+	private CardLayout cards = new CardLayout();
+	private JPanel rightHand;
+	private FancierTable ft;
+	
+	static ImageIcon tick;
+	static ImageIcon error;
 	
 	class SettingsRenderer extends DefaultTableCellRenderer {
 		@Override
@@ -59,6 +63,9 @@ public class SettingsTab extends TabItem implements PropertyChangeListener,
 		super(pane, frame, "Settings", FS2Tab.SETTINGS, frame.getGui().getUtil().getImage("settings"));
 		
 		setLayout(new BorderLayout());
+		tick = frame.getGui().getUtil().getImage("tick");
+		error = frame.getGui().getUtil().getImage("error");
+		
 		
 		//##########################
 		//1) Populate settings panels (done in order we would like them to appear)
@@ -98,7 +105,35 @@ public class SettingsTab extends TabItem implements PropertyChangeListener,
 		}
 		split.setRightComponent(rightHand);
 		
-		ft.getSelectionModel().setSelectionInterval(0, 0);
+		showSetting(frame.getGui().getConf().getString(CK.SETTINGS_ACTIVE_PANEL));
+	}
+	
+	private void showSetting(String settingClass) {
+		int tableIndex = 0;
+		for (SettingsPanel s : settings) {
+			if (s.getClass().getSimpleName().equals(settingClass)) {
+				ft.getSelectionModel().setSelectionInterval(tableIndex, tableIndex);
+				return;
+			} else {
+				tableIndex++;
+			}
+		}
+		ft.getSelectionModel().setSelectionInterval(0, 0); //select the first if none were valid.
+	}
+	
+	/**
+	 * Sets the active page to be the one indicated by the specified class.
+	 */
+	public void showSetting(Class<?> settingClass) {
+		int tableIndex = 0;
+		for (SettingsPanel s : settings) {
+			if (s.getClass() == settingClass) {
+				ft.getSelectionModel().setSelectionInterval(tableIndex, tableIndex);
+				return;
+			} else {
+				tableIndex++;
+			}
+		}
 	}
 
 	@Override
@@ -112,6 +147,7 @@ public class SettingsTab extends TabItem implements PropertyChangeListener,
 	public void valueChanged(ListSelectionEvent e) {
 		if (ft.getSelectedRowCount()>0) {
 			cards.show(rightHand, settings.get(ft.getSelectedRow()).getClass().getSimpleName());
+			frame.getGui().getConf().putString(CK.SETTINGS_ACTIVE_PANEL, settings.get(ft.getSelectedRow()).getClass().getSimpleName());
 		}
 	}
 }

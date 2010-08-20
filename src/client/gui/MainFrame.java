@@ -18,6 +18,7 @@ import common.Logger;
 
 import client.Version;
 import client.gui.TabItem.FS2Tab;
+import client.gui.settings.SettingsPanel;
 import client.gui.settings.SettingsTab;
 import client.platform.ClientConfigDefaults.CK;
 
@@ -110,14 +111,8 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 			case FILES:
 				new FilesTab(tabs, this);
 				break;
-			case INDEXNODES:
-				new IndexNodesTab(tabs, this);
-				break;
 			case CHAT:
 				new ChatTab(tabs, this);
-				break;
-			case SHARES:
-				new SharesTab(tabs, this);
 				break;
 			case PEERS:
 				new PeersTab(tabs, this);
@@ -274,9 +269,11 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 	}
 
 	/**
-	 * no longer used: unimplemented
+	 * Opens the settings tab to the page specified by the class supplied. ie: ShareSettings.class for the shares page.
+	 * @param settingClass the class of the panel to show.
 	 */
-//	private void unimplemented() {
-//		status.setInfoTextWithIcon("This feature is unimplemented.", gui.util.getImage("error"));
-//	}
+	public void openSettingsPage(Class<? extends SettingsPanel> settingClass) {
+		openTab(FS2Tab.SETTINGS);
+		((SettingsTab)instantiatedTabs.get(FS2Tab.SETTINGS)).showSetting(settingClass);
+	}
 }

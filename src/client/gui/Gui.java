@@ -56,6 +56,14 @@ public class Gui {
 		return ssvr;
 	}
 	
+	/**
+	 * Returns the download controller this gui is attached to.
+	 * @return
+	 */
+	public DownloadController getDc() {
+		return dc;
+	}
+	
 	//Hide the constructor.
 	private Gui(Config conf, Notifications notify, ShareServer ssvr, DownloadController dc) {
 		this.conf = conf;
@@ -161,7 +169,7 @@ public class Gui {
 	 * Displays the main window, even if hidden.
 	 */
 	public void showFS2() {
-		mainFrame.setVisible(true);
+		if (!ClientExecutor.shuttingDown) mainFrame.setVisible(true);
 	}
 
 	public void disableTrayIcon() {

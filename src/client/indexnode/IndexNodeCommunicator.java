@@ -205,16 +205,26 @@ public class IndexNodeCommunicator implements TableModel {
 	 * @param nodeURL
 	 * @param advertuid the advertisment id of this indexnode, zero if it was manually/config added.
 	 */
-	void registerNewIndexNode(URL nodeURL, long advertuid) {
+	private void registerNewIndexNode(URL nodeURL, long advertuid) {
 		registerNewIndexNode(nodeURL, advertuid, CK.INDEX_NODES+"/i"+nodeURL.hashCode());
 	}
 	
-	void registerNewIndexNode(URL nodeURL, long advertuid, String configurationKey) {
+	private void registerNewIndexNode(URL nodeURL, long advertuid, String configurationKey) {
 		if (advertuid==0) conf.putString(configurationKey+"/path", nodeURL.toString()); //if it wasn't advertised.
 		//due to awkwardness of the fs2 registration protocol the indexnode will add itself to the list of indexnodes.
 		//(this is because the constructor registers with the server, which will call back, the indexnode server handler will reject unknown indexnodes however)
 		new IndexNode(nodeURL, advertuid, ssvr, configurationKey);
 		fs.notifyNewIndexnode();
+	}
+	
+	void advertRecieved(URL nodeURL, long advertuid) {
+		synchronized (nodes) {
+			for (IndexNode node : nodes) {
+				if (node.advertuid == advertuid) return; //do nothing, we already have this node.
+			}
+		}
+		//if we haven't returned, then it must be a new node:
+		registerNewIndexNode(nodeURL, advertuid);
 	}
 	
 	/**
@@ -235,6 +245,11 @@ public class IndexNodeCommunicator implements TableModel {
 		if (listener!=null) {
 			listener.shutdown();
 			listener=null;
+		}
+		synchronized (nodes) {
+			for (IndexNode node : nodes.toArray(new IndexNode[]{})) { //copy the array to prevent modification exceptions.
+				if (node.wasAdvertised()) deregisterIndexNode(node);
+			}
 		}
 	}
 	
@@ -443,12 +458,11 @@ public class IndexNodeCommunicator implements TableModel {
 		}
 	}
 
-	private Class<?>[] columnClasses = {String.class, String.class, Date.class, Boolean.class}; //Name, status, last-seen, permanent
-	private String[] columnNames = {"Name", "Status", "Last-seen", "Permanent"};
+	private Class<?>[] columnClasses = {String.class, String.class, Date.class}; //Name, status, last-seen
+	private String[] columnNames = {"Name", "Status", "Last-seen"};
 	private static final int NAME_IDX=0;
 	private static final int STATUS_IDX=1;
 	private static final int LASTSEEN_IDX=2;
-	private static final int PERMANENT_IDX=3;
 	
 	
 	@Override
@@ -491,9 +505,7 @@ public class IndexNodeCommunicator implements TableModel {
 			return node.getStatusDescription();
 		} else if (columnIndex==LASTSEEN_IDX) {
 			return node.getLastSeen();
-		} else {
-			return node.isPermanent();
-		}
+		} else return "Column index invalid";
 	}
 
 	/**
@@ -520,7 +532,7 @@ public class IndexNodeCommunicator implements TableModel {
 	
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
-		return (columnIndex==PERMANENT_IDX);
+		return false;
 	}
 
 	@Override
@@ -532,10 +544,7 @@ public class IndexNodeCommunicator implements TableModel {
 
 	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-		if (columnIndex!=PERMANENT_IDX) throw new IllegalArgumentException("Only the indexnode's permanent field can be edited.");
-		synchronized (nodes) {
-			nodes.get(rowIndex).setPermanent((Boolean)aValue);
-		}
+		//nothing can be changed.
 	}
 	
 	void notifyIndexNodeInserted(final int idx) {

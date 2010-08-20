@@ -35,6 +35,7 @@ public class Version {
 	 */
 	static {
 		FS2_VERSION_DESCRIPTIONS = new HashMap<String, String>();
+		FS2_VERSION_DESCRIPTIONS.put("0.8.25", "Good progress being made on the settings tab...");
 		FS2_VERSION_DESCRIPTIONS.put("0.8.24", "Settings tab on the way. This is a work in progress. Completion will move to 0.9");
 		FS2_VERSION_DESCRIPTIONS.put("0.8.23", "Many bug fixes: launching, tab closing, search removing, average speed calculation, etc.");
 		FS2_VERSION_DESCRIPTIONS.put("0.8.22", "Now with extra chat avatars...");
@@ -54,7 +55,7 @@ public class Version {
 	/** The version identifier for the client.
 	 * This is used by the client to identify new versions 
 	 * DONT FORGET TO DESCRIBE THIS VERSION! */
-	public static final Integer[] FS2_CLIENT_VERSION_BITS = {0,8,24};
+	public static final Integer[] FS2_CLIENT_VERSION_BITS = {0,8,25};
 	
 	//Into a string:
 	public static final String FS2_CLIENT_VERSION() { return Util.join(FS2_CLIENT_VERSION_BITS,"."); }
@@ -63,7 +64,7 @@ public class Version {
 	public static final String FS2_CLIENT_NAME = "fs2client";
 	
 	/** The fancy release name for this minor version of FS2 */
-	public static final String FS2_CLIENT_RELEASE = "Antiquated Machinery";
+	public static final String FS2_CLIENT_RELEASE = "Antiquated Heavy Machinery";
 	
 	public static void main(String[] args) {
 		if (args.length==0) {

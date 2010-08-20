@@ -14,6 +14,8 @@ import javax.swing.UIManager;
 
 import client.gui.MainFrame.StatusHint;
 import client.gui.TabItem.FS2Tab;
+import client.gui.settings.IndexnodeSettings;
+import client.gui.settings.ShareSettings;
 
 @SuppressWarnings("serial")
 public class MenuBar extends JMenuBar implements ActionListener, MouseListener {
@@ -53,6 +55,24 @@ public class MenuBar extends JMenuBar implements ActionListener, MouseListener {
 
 		menu.addSeparator();
 		
+		
+		registerNewMenuItem(menu, "Shares", frame.gui.util.getImage("shares"), "See and change what you share", new Runnable() {
+			@Override
+			public void run() {
+				frame.openSettingsPage(ShareSettings.class);
+			}
+		});
+		
+		registerNewMenuItem(menu, "Indexnodes", frame.gui.util.getImage("autodetect"), "Change the indexnodes that FS2 tries to connect with", new Runnable() {
+			@Override
+			public void run() {
+				frame.openSettingsPage(IndexnodeSettings.class);
+			}
+		});
+		
+		menu.addSeparator();
+		
+		
 		JMenu laf = new JMenu("Look and Feel");
 		menu.add(laf);
 		
@@ -82,23 +102,8 @@ public class MenuBar extends JMenuBar implements ActionListener, MouseListener {
 			public void run() {
 				frame.gui.setLaF("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
 			}
-		});
+		});	
 		
-		menu.addSeparator();
-		
-		registerNewMenuItem(menu, "Shares", frame.gui.util.getImage("shares"), "See and change what you share", new Runnable() {
-			@Override
-			public void run() {
-				frame.openTab(FS2Tab.SHARES);
-			}
-		});
-		
-		registerNewMenuItem(menu, "Indexnodes", frame.gui.util.getImage("autodetect"), "Change the indexnodes that FS2 tries to connect with", new Runnable() {
-			@Override
-			public void run() {
-				frame.openTab(FS2Tab.INDEXNODES);;
-			}
-		});
 	}
 	
 	private void addViewMenu() {

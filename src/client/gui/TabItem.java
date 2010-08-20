@@ -28,7 +28,7 @@ import client.platform.ClientConfigDefaults.CK;
 @SuppressWarnings("serial")
 public abstract class TabItem extends JPanel {
 	
-	public enum FS2Tab {FILES, INDEXNODES, CHAT, SHARES, PEERS, DOWNLOADS, STATS, UPLOADS, SETTINGS}
+	public enum FS2Tab {FILES, CHAT, PEERS, DOWNLOADS, STATS, UPLOADS, SETTINGS}
 	
 	static Icon closeInactive;
 	static Icon closeActive;

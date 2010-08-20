@@ -32,7 +32,7 @@ import common.Sxml.SXMLException;
  * Every entry may have unlimited children.
  * 
  * Keys are identified as they would be in a file system, separated by '/'
- * Keys may not be soley numeric, nor may they contain spaces. They must be representable by XML tag names.
+ * Keys may not start with a number, nor may they contain spaces. They must be representable by XML tag names.
  * 
  * @author gary
  */
@@ -184,7 +184,7 @@ public class Config implements Savable {
 	 * @param value
 	 * @param comment allows a comment to be placed after this node in the XML file.
 	 */
-	synchronized void putString(String key, String value, String comment) {
+	private synchronized void putString(String key, String value, String comment) {
 		Element confElem = getElement(key);
 		if (comment!=null) confElem.getParentNode().appendChild(confElem.getOwnerDocument().createComment(key+": "+comment));
 		
@@ -262,6 +262,13 @@ public class Config implements Savable {
 	
 	public synchronized String getXML() {
 		return xml.toString();
+	}
+	
+	/**
+	 * Will erase the config file on JVM shutdown.
+	 */
+	public void eraseOnShutdown() {
+		xml.getFile().deleteOnExit();
 	}
 	
 }

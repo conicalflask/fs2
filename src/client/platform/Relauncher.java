@@ -81,9 +81,11 @@ public class Relauncher {
 	 * false for outright instant failure: such as trying to relaunch not from a jar, or if the JVM is missing.
 	 * true if the execution started and ended without exception.
 	 * 
+	 * @param pipeThrough if true then this process will wait in a minimal state passing through stderr and stdout. Otherwise these get disgarded. On os x you'll get a load of dock icons for the semi-active processes if piping is enabled.
+	 * 
 	 * @return 
 	 */
-	public static boolean increaseHeap(long newHeapSize) {
+	public static boolean increaseHeap(long newHeapSize, boolean pipeThrough) {
 		try {
 			String jvmPath = Platform.getCurrentPlatformOS().getJVMExecutablePath(); 
 			
@@ -114,9 +116,10 @@ public class Relauncher {
 			
 			Process newJVM = Runtime.getRuntime().exec(args.toArray(new String[] {}));
 			
-			pipeOutput(newJVM);
-			
-			newJVM.waitFor();
+			if (pipeThrough) {
+				pipeOutput(newJVM);
+				newJVM.waitFor();
+			}
 			
 			return true; //at this point the subprocess has ended. Hopefully well...
 		} catch (Exception e) {
