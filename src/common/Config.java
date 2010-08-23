@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 
 import javax.xml.transform.TransformerException;
 
+import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -53,9 +54,18 @@ public class Config implements Savable {
 		}
 	}
 	
-	ConfigDefaults defs;
-	Sxml xml;
-	SafeSaver saver = new SafeSaver(this, FS2Constants.CONFIG_SAVE_INTERVAL);
+	private ConfigDefaults defs;
+	private Sxml xml;
+	private SafeSaver saver = new SafeSaver(this, FS2Constants.CONFIG_SAVE_INTERVAL);
+	
+	//Assumption: caching key->element mappings will be faster than traversing the XML every time.
+	private HashMap<String, Element> elemCache = new HashMap<String, Element>();
+	
+	private boolean shuttingDown = false;
+	
+	//Used for derived configs.
+	private String keyPrefix = "";
+	
 	
 	/**
 	 * Creates a new XML-backed configuration database based upon the file specified.
@@ -93,63 +103,81 @@ public class Config implements Savable {
 		if (xml.createdNew()) buildDefaultConfig();
 	}
 	
-	public void putString(String key, String value) {
-		putString(key, value, null);
-	}
-	
-	public void putLong(String key, Long value) {
-		putString(key, value.toString(), null);
-	}
-	
-	public void putInt(String key, Integer value) {
-		putString(key, value.toString(), null);
-	}
-	
-	public void putBoolean(String key, Boolean value) {
-		putString(key, value.toString(), null);
-	}
-	
-	public synchronized void deleteKey(String key) {
-		try {
-			Element elem = getElement(key);
-			elem.getParentNode().removeChild(elem);
-			elemCache.remove(key);
-			//remove all child keys from the cache too:
-			Iterator<String> pKeys = elemCache.keySet().iterator();
-			while (pKeys.hasNext()) {
-				String pKey = pKeys.next();
-				if (pKey.startsWith(key)) {
-					pKeys.remove();
-				}
+	void buildDefaultConfig() {
+		synchronized (xml) {
+			for (Entry<String, String> def : defs.getDefaults().entrySet()) {
+				putString(def.getKey(), def.getValue(), defs.getComments().get(def.getKey()));
 			}
-		} catch (Exception e) {
-			Logger.warn("Removing key '"+key+"' from config failed: "+e);
-			e.printStackTrace();
-		}
-		saver.requestSave();
-	}
-	
-	public synchronized String getString(String key) {
-		String potential = getElement(key).getTextContent();
-		if (potential.equals("")) {
-			if (defs.getDefaults().containsKey(key)) {
-				putString(key, defs.getDefaults().get(key), defs.getComments().get(key));  //store the default in the file from now on too.
-				return defs.getDefaults().get(key);
-			} else return "";
-	 	} else return potential;
-	}
-	
-	public Long getLong(String key) {
-		try {
-			return Long.parseLong(getString(key));
-		} catch (NumberFormatException e) {
-			Logger.warn("Configuration item: '"+key+"' must be numeric, but it's not. Assuming zero.");
-			return 0L;
+			Logger.warn("Built a fresh configuration file for '"+defs.getRootElementName()+"' from defaults.");
+			doSave();
 		}
 	}
 	
-	public int getInt(String key) {
-		return getLong(key).intValue();
+	public void deleteKey(String key) {
+		synchronized (xml) {
+			try {
+				Element elem = getElement(key);
+				elem.getParentNode().removeChild(elem);
+				
+				key=keyPrefix+key; //caches uses prefixed keys.
+				elemCache.remove(key);
+				//remove all child keys from the cache too:
+				Iterator<String> pKeys = elemCache.keySet().iterator();
+				while (pKeys.hasNext()) {
+					String pKey = pKeys.next();
+					if (pKey.startsWith(key)) {
+						pKeys.remove();
+					}
+				}
+			} catch (DOMException e) {
+				Logger.warn("Removing key '"+key+"' from config failed: "+e);
+				e.printStackTrace();
+			}
+			saver.requestSave();
+		}
+	}
+	
+	private Config() {} //used to derive configs.
+	
+	/**
+	 * Returns a new Config that is stored entirely within the 'prefixKey' specified in this object.
+	 * It effectively chroots into a key of the config.
+	 * 
+	 * @param defs
+	 * @param prefixKey should be a key in the top-level config.
+	 * @return
+	 */
+	public Config deriveConfig(ConfigDefaults defs, String prefixKey) {
+		//1) effectively clone the config;
+		Config ret = new Config();
+		ret.defs = defs;
+		ret.elemCache = elemCache;
+		ret.saver = saver;
+		ret.xml = xml;
+		ret.keyPrefix = keyPrefix+prefixKey;
+		return ret;
+	}
+	
+	@Override
+	public void doSave() {
+		synchronized (xml) {
+			try {
+				if (shuttingDown) {
+					xml.clean(); //remove nasty extra whitespace.
+				}
+				xml.save();
+			} catch (SXMLException e) {
+				Logger.warn("Configuration could not be saved: "+e);
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	/**
+	 * Will erase the config file on JVM shutdown.
+	 */
+	public void eraseOnShutdown() {
+		xml.getFile().deleteOnExit();
 	}
 	
 	public boolean getBoolean(String key) {
@@ -162,20 +190,104 @@ public class Config implements Savable {
 	 * @param key
 	 * @return
 	 */
-	public synchronized LinkedList<String> getChildKeys(String key) {
-		LinkedList<String> keys = new LinkedList<String>();
-		
-		Node onNode = getElement(key).getFirstChild();
-		while (onNode!=null) {
-			try {
-				if (onNode.getNodeType()!=Node.ELEMENT_NODE) continue;
-				keys.add( key+"/"+((Element)onNode).getTagName() );
-			} finally {
-				onNode = onNode.getNextSibling();
+	public LinkedList<String> getChildKeys(String key) {
+		synchronized (xml) {
+			LinkedList<String> keys = new LinkedList<String>();
+			
+			Node onNode = getElement(key).getFirstChild();
+			while (onNode!=null) {
+				try {
+					if (onNode.getNodeType()!=Node.ELEMENT_NODE) continue;
+					keys.add( key+"/"+((Element)onNode).getTagName() );
+				} finally {
+					onNode = onNode.getNextSibling();
+				}
 			}
+			
+			return keys;
 		}
-		
-		return keys;
+	}
+	
+	/**
+	 * Gets the element in the configuration file specified by 'key'.
+	 * Creates the element and all required children if necessary.
+	 * @param key
+	 * @return
+	 */
+	private Element getElement(String key) {
+		key=keyPrefix+key;
+		synchronized (xml) {
+			if (elemCache.containsKey(key)) return elemCache.get(key);
+			Document doc = xml.getDocument();
+			Node onNode = doc.getFirstChild();
+			if (onNode==null) {
+				onNode = doc.createElement(defs.getRootElementName());
+				doc.appendChild(onNode);
+			}
+			for (String bit : key.split("/")) {
+				if (bit.length()==0) continue;
+				try {
+					Node nextNode = XPathAPI.selectSingleNode(onNode, bit);
+					if (nextNode==null) {
+						nextNode = doc.createElement(bit);
+						onNode.appendChild(nextNode);
+					}
+					
+					onNode = nextNode;
+				} catch (TransformerException e) {
+					Logger.severe("Exception processing configuration: "+e);
+					e.printStackTrace();
+					return null;
+				}
+			}
+			elemCache.put(key, (Element)onNode);
+			return (Element)onNode;
+		}
+	}
+	
+	public int getInt(String key) {
+		return getLong(key).intValue();
+	}
+	
+	public Long getLong(String key) {
+		try {
+			return Long.parseLong(getString(key));
+		} catch (NumberFormatException e) {
+			Logger.warn("Configuration item: '"+key+"' must be numeric, but it's not. Assuming zero.");
+			return 0L;
+		}
+	}
+	
+	public String getString(String key) {
+		synchronized (xml) {
+			String potential = getElement(key).getTextContent();
+			if (potential.equals("")) {
+				if (defs.getDefaults().containsKey(key)) {
+					putString(key, defs.getDefaults().get(key), defs.getComments().get(key));  //store the default in the file from now on too.
+					return defs.getDefaults().get(key);
+				} else return "";
+		 	} else return potential;
+		}
+	}
+	public String getXML() {
+		synchronized (xml) {
+			return xml.toString();
+		}
+	}
+	
+	public void putBoolean(String key, Boolean value) {
+		putString(key, value.toString(), null);
+	}
+	
+	public void putInt(String key, Integer value) {
+		putString(key, value.toString(), null);
+	}
+	public void putLong(String key, Long value) {
+		putString(key, value.toString(), null);
+	}
+	
+	public void putString(String key, String value) {
+		putString(key, value, null);
 	}
 	
 	/**
@@ -184,91 +296,25 @@ public class Config implements Savable {
 	 * @param value
 	 * @param comment allows a comment to be placed after this node in the XML file.
 	 */
-	private synchronized void putString(String key, String value, String comment) {
-		Element confElem = getElement(key);
-		if (comment!=null) confElem.getParentNode().appendChild(confElem.getOwnerDocument().createComment(key+": "+comment));
-		
-		//Now only set the text content if this node does not already contain elements (ie: ignore requests to store information in collections)
-		NodeList childs = confElem.getChildNodes();
-		boolean canWrite = true;
-		for (int i=0; i<childs.getLength(); i++) {
-			if (childs.item(i).getNodeType()==Node.ELEMENT_NODE) canWrite=false;
-		}
-		if (canWrite) confElem.setTextContent(value);
-		saver.requestSave();
-	}
-	
-	//Assumption: caching key->element mappings will be faster than traversing the XML every time.
-	HashMap<String, Element> elemCache = new HashMap<String, Element>();
-	/**
-	 * Gets the element in the configuration file specified by 'key'.
-	 * Creates the element and all required children if necessary.
-	 * @param key
-	 * @return
-	 */
-	private synchronized Element getElement(String key) {
-		if (elemCache.containsKey(key)) return elemCache.get(key);
-		Document doc = xml.getDocument();
-		Node onNode = doc.getFirstChild();
-		if (onNode==null) {
-			onNode = doc.createElement(defs.getRootElementName());
-			doc.appendChild(onNode);
-		}
-		for (String bit : key.split("/")) {
-			if (bit.length()==0) continue;
-			try {
-				Node nextNode = XPathAPI.selectSingleNode(onNode, bit);
-				if (nextNode==null) {
-					nextNode = doc.createElement(bit);
-					onNode.appendChild(nextNode);
-				}
-				
-				onNode = nextNode;
-			} catch (TransformerException e) {
-				Logger.severe("Exception processing configuration: "+e);
-				e.printStackTrace();
-				return null;
+	private void putString(String key, String value, String comment) {
+		synchronized (xml) {
+			Element confElem = getElement(key);
+			if (comment!=null) confElem.getParentNode().appendChild(confElem.getOwnerDocument().createComment(key+": "+comment));
+			
+			//Now only set the text content if this node does not already contain elements (ie: ignore requests to store information in collections)
+			NodeList childs = confElem.getChildNodes();
+			boolean canWrite = true;
+			for (int i=0; i<childs.getLength(); i++) {
+				if (childs.item(i).getNodeType()==Node.ELEMENT_NODE) canWrite=false;
 			}
-		}
-		elemCache.put(key, (Element)onNode);
-		return (Element)onNode;
-	}
-	
-	synchronized void buildDefaultConfig() {
-		for (Entry<String, String> def : defs.getDefaults().entrySet()) {
-			putString(def.getKey(), def.getValue(), defs.getComments().get(def.getKey()));
-		}
-		Logger.warn("Built a fresh configuration file for '"+defs.getRootElementName()+"' from defaults.");
-		doSave();
-	}
-	
-	private boolean shuttingDown = false;
-	public synchronized void doSave() {
-		try {
-			if (shuttingDown) {
-				xml.clean(); //remove nasty extra whitespace.
-			}
-			xml.save();
-		} catch (SXMLException e) {
-			Logger.warn("Configuration could not be saved: "+e);
-			e.printStackTrace();
+			if (canWrite) confElem.setTextContent(value);
+			saver.requestSave();
 		}
 	}
 	
 	public void shutdown() {
 		shuttingDown = true;
 		saver.saveShutdown();
-	}
-	
-	public synchronized String getXML() {
-		return xml.toString();
-	}
-	
-	/**
-	 * Will erase the config file on JVM shutdown.
-	 */
-	public void eraseOnShutdown() {
-		xml.getFile().deleteOnExit();
 	}
 	
 }

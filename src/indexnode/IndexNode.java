@@ -17,6 +17,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -768,7 +769,6 @@ public class IndexNode {
 	Date startedDate = new Date();
 	Filesystem fs;
 	private int onPort;
-	private boolean shouldAdvertise;
 	/** when true this indexnode is in secure mode*/
 	private boolean useSecure;
 	private boolean dhanonUsed;
@@ -784,8 +784,11 @@ public class IndexNode {
 	private IndexAvatar avatar;
 	private ChatDatabase chat = new ChatDatabase();
 	private IndexChat ic;
-	private long advertuid;
 	private Config conf;
+	private IndexAdvertismentManager advertManager;
+	
+	//used for shutdown:
+	private ArrayList<HttpServer> httpServers = new ArrayList<HttpServer>();
 	
 	public Config getConf() {
 		return conf;
@@ -804,10 +807,21 @@ public class IndexNode {
 	}
 	
 	/**
-	 * Constructs a new IndexNode server.
-	 * @param confFile The configuration file to use for this indexnode.
+	 * Constucts an indexnode that is not internal
+	 * @param conf
+	 * @param internal
+	 * @throws Exception
 	 */
 	public IndexNode(Config conf) throws Exception {
+		this(conf, false);
+	}
+	
+	/**
+	 * Constructs a new IndexNode server.
+	 * @param confFile The configuration file to use for this indexnode.
+	 * @param internal true iff this is executing within a client;
+	 */
+	public IndexNode(final Config conf, boolean internal) throws Exception {
 		this.conf = conf;
 		
 		//Initialise filesystem:
@@ -833,10 +847,6 @@ public class IndexNode {
 		} else {
 			Logger.severe("Running in INSECURE mode. Plain-text sockets without authentication will be accepted!");
 		}
-		shouldAdvertise = Boolean.parseBoolean(conf.getString(IK.ADVERTISE));
-		
-		advertuid = conf.getLong(IK.ADVERTUID);
-		
 		fs2Filter = new FS2Filter();
 		
 		fs2Filter.setAlias(conf.getString(IK.ALIAS));
@@ -866,20 +876,70 @@ public class IndexNode {
 			}
 			listenOnInterface(NetworkInterface.getByName(bindTo));
 		}
+		
+		//internal indexnodes do not advertise themselves.
+		if (!internal && conf.getBoolean(IK.ADVERTISE)) {
+			final long advertuid = conf.getLong(IK.ADVERTUID);
+			advertManager = new IndexAdvertismentManager(conf, new AdvertDataSource() {
+				
+				/**
+				 * Not prospective if a real, life static instance node.
+				 */
+				@Override
+				public boolean isProspectiveIndexnode() {
+					return false;
+				}
+				
+				@Override
+				public int getPort() {
+					return onPort;
+				}
+				
+				/**
+				 * Makes no sense for an existing indexnode.
+				 */
+				@Override
+				public long getIndexValue() {
+					return 0;
+				}
+				
+				@Override
+				public long getAdvertUID() {
+					return advertuid;
+				}
+	
+				@Override
+				public boolean isActive() {
+					return true; //a standalone indexnode can't be inactive.
+				}
+			});
+		}
+	}
+	
+	public IndexAdvertismentManager getAdvertManager() {
+		return advertManager;
 	}
 
-	private void listenOnInterface(NetworkInterface if0) throws IOException, SocketException {
-		InetAddress advertiseOn = null;
-		String aos = conf.getString(IK.ADVERTISE_ADDRESS);
-		if (aos!=null && !aos.equals("all")) {
-			advertiseOn = InetAddress.getByName(aos);
+	/**
+	 * Destroys an indexnode instance.
+	 */
+	public void shutdown() {
+		if (advertManager!=null) advertManager.shutdown();
+		
+		for (HttpServer hs : httpServers) {
+			hs.stop();
 		}
+		
+		clientLivenessTimer.cancel();
+	}
+	
+	private void listenOnInterface(NetworkInterface if0) throws IOException, SocketException {
 		InetSocketAddress addr;
 		Enumeration<InetAddress> addrs = if0.getInetAddresses();
 		if (addrs.hasMoreElements()) {
 			while (addrs.hasMoreElements()) {
 				addr = new InetSocketAddress(addrs.nextElement(), onPort);
-				bindToAddress(advertiseOn, addr);
+				bindToAddress(addr);
 			}
 		} else {
 			Logger.warn("Not listening on "+if0.getDisplayName()+" it has no addresses.");
@@ -894,11 +954,12 @@ public class IndexNode {
 	 * @throws IOException
 	 * @throws SocketException
 	 */
-	private void bindToAddress(InetAddress advertiseOn, InetSocketAddress addr)
+	private void bindToAddress(InetSocketAddress addr)
 			throws IOException, SocketException {
 		//Setup and bind the http server:
 		HttpServer http = startHttpServer(addr);
 		if (http==null) return;
+		httpServers.add(http);
 		
 		//Enable a multithreaded executor:
 		http.setExecutor(httpServicePool);
@@ -935,9 +996,6 @@ public class IndexNode {
 		
 		// Start the web server:
 		http.start();
-		if (shouldAdvertise && (advertiseOn==null || advertiseOn.equals(addr.getAddress()))) {
-			new IndexAdvertiser(addr, advertuid);
-		}
 	}
 	
 	void addContext(HttpServer server, String path, HttpHandler handler) {
@@ -958,6 +1016,10 @@ public class IndexNode {
 			//e.printStackTrace();
 			return null;
 		}
+	}
+
+	public void setAlias(String newAlias) {
+		fs2Filter.setAlias(newAlias);
 	}
 	
 }

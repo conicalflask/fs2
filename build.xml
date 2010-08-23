@@ -25,9 +25,9 @@
   	</javac>
   </target>
   
-  <target name="compileclient" depends="compilecommon"
+  <target name="compileclient" depends="compilecommon,compileindexnode"
         description="compile the client" >
-    <javac debug="true" classpath="${build}/common" sourcepath="" srcdir="${src}" destdir="${build}">
+    <javac debug="true" classpath="${build}/common;${build}/indexnode" sourcepath="" srcdir="${src}" destdir="${build}">
       <include name="client/**/*.java"/>
     </javac>
   </target>
@@ -57,7 +57,8 @@
     <jar jarfile="${dist}/fs2client-${clientver}.jar" basedir="${build}">
     	<include name="icons/*"/>
     	<include name="client/**/*.class"/>
-      <include name="common/**/*.class"/>
+        <include name="common/**/*.class"/>
+    	<include name="indexnode/**/*.class"/>
       <manifest>
         <attribute name="Built-By" value="${user.name}"/>
         <attribute name="SplashScreen-Image" value="icons/splash.png"/>

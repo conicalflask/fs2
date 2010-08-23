@@ -5,19 +5,17 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.RescaleOp;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
@@ -31,6 +29,7 @@ import common.FS2Constants;
 import common.Logger;
 import common.Util;
 
+import client.ClientExecutor;
 import client.gui.JBytesBox;
 import client.gui.MainFrame;
 import client.gui.MainFrame.StatusHint;
@@ -50,6 +49,7 @@ public class AdvancedSettings extends SettingsPanel {
 		warning.setAlignmentX(CENTER_ALIGNMENT);
 		boxes.add(warning);
 		boxes.add(createSlotsPanel());
+		boxes.add(autoupdatePanel());
 		boxes.add(heapSizePanel());
 		boxes.add(portPanel());
 		boxes.add(resetToDefaultsPanel());
@@ -151,7 +151,7 @@ public class AdvancedSettings extends SettingsPanel {
 	}
 	
 	JLabel heapInfo = new JLabel();
-	Timer heapInfoTimer;
+	Timer infoTimer;
 	private JPanel heapSizePanel() {
 		JPanel content = new JPanel();
 		content.setLayout(new BorderLayout());
@@ -185,13 +185,14 @@ public class AdvancedSettings extends SettingsPanel {
 		heapInfo.setBorder(BorderFactory.createEmptyBorder(0,0,0,5));
 		content.add(heapsize, BorderLayout.CENTER);
 		
-		heapInfoTimer = new Timer(5000, new ActionListener() {
+		infoTimer = new Timer(5000, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				setHeapInfo();
+				setPortNumberInfo();
 			}
 		});
-		heapInfoTimer.start();
+		infoTimer.start();
 		
 		JButton gc = new JButton(frame.getGui().getUtil().getImage("gc"));
 		gc.addActionListener(new ActionListener() {
@@ -250,9 +251,9 @@ public class AdvancedSettings extends SettingsPanel {
 		ports.add(Integer.toString(frame.getGui().getConf().getInt(CK.PORT)+1));
 		ports.add(Integer.toString(FS2Constants.ADVERTISMENT_DATAGRAM_PORT));
 		ports.add(Integer.toString(FS2Constants.ADVERTISMENT_DATAGRAM_PORT+1));
-		if (frame.getGui().getInternalIndexnode().isCurrentlyActive()) {
-			ports.add(Integer.toString(frame.getGui().getInternalIndexnode().getPort()));
-			ports.add(Integer.toString(frame.getGui().getInternalIndexnode().getPort()+1));
+		if (frame.getGui().getShareServer().getIndexNodeCommunicator().getInternalIndexNode().isCurrentlyActive()) {
+			ports.add(Integer.toString(frame.getGui().getShareServer().getIndexNodeCommunicator().getInternalIndexNode().getPort()));
+			ports.add(Integer.toString(frame.getGui().getShareServer().getIndexNodeCommunicator().getInternalIndexNode().getPort()+1));
 		}
 		
 		portNumberInfo.setText("<html>FS2 is currently using ports: <b>"+Util.join(ports.toArray(), ", ")+"</b><br>Open these ports on your firewall to use FS2</html>");
@@ -263,7 +264,52 @@ public class AdvancedSettings extends SettingsPanel {
 	 * @return
 	 */
 	private JPanel autoupdatePanel() {
-		return null;
+		JPanel ret = new JPanel(new BorderLayout());
+		ret.setBorder(getTitledBoldBorder("Autoupdate"));
+		
+		String[] options = {"Automatically update (Recommended)", "Ask when updates are available", "Never update"};
+		
+		final JComboBox choice = new JComboBox(options);
+		
+		if (frame.getGui().getConf().getString(CK.UPDATE_POLICY).equals("none")) {
+			choice.setSelectedIndex(2);
+		} else if (frame.getGui().getConf().getString(CK.UPDATE_POLICY).equals("ask")) {
+			choice.setSelectedIndex(1);
+		} else if (frame.getGui().getConf().getString(CK.UPDATE_POLICY).equals("auto")) { //pointless test for completeness.
+			choice.setSelectedIndex(0);
+		}
+		
+		choice.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				switch (choice.getSelectedIndex()) {
+				case 0:
+					frame.getGui().getConf().putString(CK.UPDATE_POLICY, "auto");
+					break;
+				case 1:
+					frame.getGui().getConf().putString(CK.UPDATE_POLICY, "ask");
+					break;
+				default:
+					frame.getGui().getConf().putString(CK.UPDATE_POLICY, "none");
+					break;
+				}
+			}
+		});
+		
+		JLabel auinfo = new JLabel("<html>Select <i>'"+options[2]+"'</i> to prevent FS2 from even checking for updates.</html>");
+		ret.add(auinfo, BorderLayout.NORTH);
+		ret.add(choice, BorderLayout.WEST);
+		
+		JButton aunow = new JButton("Check for updates now", frame.getGui().getUtil().getImage("checkupdates"));
+		ret.add(aunow, BorderLayout.EAST);
+		aunow.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				ClientExecutor.getAcquire().checkForUpdatesNowAndAsk();
+			}
+		});
+		
+		return ret;
 	}
 	
 	

@@ -11,6 +11,11 @@ import common.Logger;
 
 /**
  * Listens out for adverts sent by indexnodes.
+ * 
+ * There are two kinds of adverts:
+ * 1) from active indexnodes specifying they are ready for connection
+ * 2) from potential automatic indexnodes specifying their readiness to become an indexnode if there's no better candidate available.
+ * 
  * @author gary
  */
 public class AdvertListener extends Thread {

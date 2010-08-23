@@ -272,7 +272,7 @@ public class IndexNode {
 		}
 	}
 	
-	HashSet<ChatListener> chatListeners = new HashSet<ChatListener>();
+	private HashSet<ChatListener> chatListeners = new HashSet<ChatListener>();
 	
 	public void registerChatListener(ChatListener l) {
 		synchronized (chatListeners) {

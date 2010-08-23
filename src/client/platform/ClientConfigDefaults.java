@@ -71,6 +71,11 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		public static final String SETTINGS_COLWIDTHS = "gui/settings_list_columnwidths/col";
 		public static final String SETTINGS_DIVIDER_LOCATION = "gui/settings_divider_location";
 		public static final String SETTINGS_ACTIVE_PANEL = "gui/settings_active_page";
+		
+		//Internal indexnode:
+		public static final String INTERNAL_INDEXNODE_ROOTKEY = "internal_indexnode/";
+		public static final String AUTOMATIC_INDEXNODE = "internal_indexnode/autorun";
+		public static final String INTERNAL_INDEXNODE_ALWAYS_ON = "internal_indexnode/alwayson"; 
 	}
 	
 	protected HashMap<String, String> defaults = new HashMap<String, String>();
@@ -104,6 +109,13 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		
 		defaults.put(CK.AUTO_INDEX_NODE,"true");
 		comments.put(CK.AUTO_INDEX_NODE, "if auto_index is 'true' then this client will automatically register with autodetected indexnodes.");
+		
+		defaults.put(CK.AUTOMATIC_INDEXNODE, "true");
+		comments.put(CK.AUTOMATIC_INDEXNODE, "if true then this client will automatically run an indexnode when needed");
+		
+		defaults.put(CK.INTERNAL_INDEXNODE_ALWAYS_ON, "false");
+		comments.put(CK.INTERNAL_INDEXNODE_ALWAYS_ON, "if true then this client will always run an internal indexnode regardless of suitability");
+		
 		
 		defaults.put(CK.INDEX_NODES, "");
 		comments.put(CK.INDEX_NODES, "Children of the indexnodes key should contain two subchildren: 'path' is the insecure URL to the indexnode, 'password' is the plain MD5 of the password used for this indexnode. The password hash is never transmitted over clear channels.");

@@ -120,6 +120,10 @@ public class ClientExecutor {
 		}
 	}
 	
+	public static Acquire getAcquire() {
+		return acquire;
+	}
+	
 	public static void setGui(Gui gui) {
 		ClientExecutor.gui = gui;
 	}

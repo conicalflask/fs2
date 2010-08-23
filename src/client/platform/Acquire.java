@@ -7,6 +7,8 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedList;
 
+import javax.swing.JOptionPane;
+
 import common.Config;
 import common.HttpUtil;
 import common.Logger;
@@ -79,6 +81,25 @@ public class Acquire {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Checks for updates immediately, and prompts regardless of conf settings.
+	 * Only works with a GUI.
+	 */
+	public void checkForUpdatesNowAndAsk() {
+		CodeUpdate update = getLatestUpdate(null);
+		if (update!=null) {
+			if (notify.askAutoUpdate(conf, update)) {
+				if (downloadUpdate(update)) {
+					if (!Relauncher.go()) {
+						JOptionPane.showMessageDialog(null, "The new version of FS2 failed to start. Try closing FS2 completely and restarting it.", "Update failed", JOptionPane.ERROR_MESSAGE); //They're pretty screwed if this is happening.
+					}
+				}
+			}
+		} else {
+			JOptionPane.showMessageDialog(null, "You're already running the latest version of FS2.", "No updates available", JOptionPane.INFORMATION_MESSAGE);
+		}
 	}
 	
 	/**

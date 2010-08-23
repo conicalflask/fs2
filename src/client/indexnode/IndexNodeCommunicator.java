@@ -37,6 +37,7 @@ import common.Sxml;
 import common.Util;
 import client.gui.Utilities;
 import client.indexnode.downloadcontroller.DownloadSource;
+import client.indexnode.internal.InternalIndexnodeManager;
 import client.platform.ClientConfigDefaults.CK;
 import client.shareserver.Share;
 import client.shareserver.ShareServer;
@@ -57,6 +58,7 @@ public class IndexNodeCommunicator implements TableModel {
 
 	ArrayList<IndexNode> nodes = new ArrayList<IndexNode>();
 	AdvertListener listener = null;
+	boolean autodetectIndexnodes = false;
 	ShareServer ssvr = null;
 	String shareListXML = "";
 	IndexNodeOnlyFilter inof = new IndexNodeOnlyFilter(this);
@@ -66,6 +68,9 @@ public class IndexNodeCommunicator implements TableModel {
 	ArrayList<TableModelListener> modelListeners = new ArrayList<TableModelListener>();
 	IndexNodeStatsTableModel statsTable = new IndexNodeStatsTableModel(this);
 	ArrayList<NewPeerListener> newPeerListeners = new ArrayList<NewPeerListener>();
+	
+	//Our own personal indexnode:
+	InternalIndexnodeManager iim;
 	
 	//Avatar stuff:
 	String encodedAvatar;		//base64 encoded cache of the current avatar
@@ -123,6 +128,15 @@ public class IndexNodeCommunicator implements TableModel {
 		ping.getFilters().add(inof);
 		buildShareListXML();
 		setupAvatar();
+		iim = new InternalIndexnodeManager(this);
+	}
+	
+	public Config getConf() {
+		return conf;
+	}
+
+	public InternalIndexnodeManager getInternalIndexNode() {
+		return iim;
 	}
 	
 	public TableModel getStatsTableModel() {
@@ -151,12 +165,9 @@ public class IndexNodeCommunicator implements TableModel {
 	}
 
 	void setupAdvertListeningIfNeeded() {
-		if (Boolean.parseBoolean(conf.getString(CK.AUTO_INDEX_NODE))) {
-			if (enableAdvertAcceptance()) {
-				Logger.log("Automatic indexnode registration enabled.");
-			} else {
-				Logger.log("Automatic indexnode registration is unavailable.\nIt's likely the port ("+FS2Constants.ADVERTISMENT_DATAGRAM_PORT+") is already in use,\nor you do not have permission to recieve UDP broadcasts.");
-			}
+		autodetectIndexnodes = Boolean.parseBoolean(conf.getString(CK.AUTO_INDEX_NODE));
+		if ((listener=AdvertListener.getAdvertListener(this))==null) {
+			Logger.log("Indexnode advert listener couldn't be created. Autodetection and autohosting will be unavailable.\nIt's likely the port ("+FS2Constants.ADVERTISMENT_DATAGRAM_PORT+") is already in use,\nor you do not have permission to recieve UDP broadcasts.");
 		}
 	}
 	
@@ -217,7 +228,13 @@ public class IndexNodeCommunicator implements TableModel {
 		fs.notifyNewIndexnode();
 	}
 	
+	/**
+	 * Notifies this communicator that there's an active indexnode available.
+	 * @param nodeURL
+	 * @param advertuid
+	 */
 	void advertRecieved(URL nodeURL, long advertuid) {
+		if (!autodetectIndexnodes) return; //ignore the advert if we're not configured to autodetect.
 		synchronized (nodes) {
 			for (IndexNode node : nodes) {
 				if (node.advertuid == advertuid) return; //do nothing, we already have this node.
@@ -231,21 +248,14 @@ public class IndexNodeCommunicator implements TableModel {
 	 * Determines if this client will automatically register with new advertising indexnodes.
 	 * @return Returns true if adverts will now be listened to. Returns false if advert reception is unavailable.
 	 */
-	public boolean enableAdvertAcceptance() {
+	public void enableAdvertAcceptance() {
 		conf.putString(CK.AUTO_INDEX_NODE, Boolean.TRUE.toString());
-		if ((listener=AdvertListener.getAdvertListener(this))!=null) {
-			return true;
-		} else {
-			return false;
-		}
+		autodetectIndexnodes = true;
 	}
 	
 	public void disableAdvertAcceptance() {
 		conf.putString(CK.AUTO_INDEX_NODE, Boolean.FALSE.toString());
-		if (listener!=null) {
-			listener.shutdown();
-			listener=null;
-		}
+		autodetectIndexnodes = false;
 		synchronized (nodes) {
 			for (IndexNode node : nodes.toArray(new IndexNode[]{})) { //copy the array to prevent modification exceptions.
 				if (node.wasAdvertised()) deregisterIndexNode(node);
@@ -412,6 +422,7 @@ public class IndexNodeCommunicator implements TableModel {
 	 */
 	public void aliasChanged() {
 		Util.scheduleExecuteNeverFasterThan(1000, aliasChangeHandler);
+		iim.clientAliasChanged();
 	}
 	
 	AliasChangeHandler aliasChangeHandler = new AliasChangeHandler();
