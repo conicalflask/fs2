@@ -198,6 +198,7 @@ public class IndexNode {
 					} else {
 						Logger.warn("Unable to send a new chat message: "+e);
 					}
+					contactIndexNode(); //if there's IO trouble, we want to drop the indexnode ASAP.
 				} catch (Exception e) {
 					Logger.warn("Malformed or broken chat messages from indexnode '"+getName()+"': "+e);
 					e.printStackTrace();
@@ -273,6 +274,7 @@ public class IndexNode {
 	}
 	
 	private HashSet<ChatListener> chatListeners = new HashSet<ChatListener>();
+	private boolean isAutomaticNode; //true iff this node was automatically started.
 	
 	public void registerChatListener(ChatListener l) {
 		synchronized (chatListeners) {
@@ -377,9 +379,17 @@ public class IndexNode {
 		
 		if (isSecure()) ret+=" (secure)";
 		if (amAdmin()) ret+=" (admin)";
-		if (wasAdvertised()) ret+=" (autodetected)";
+		if (isAutomatic()) ret+=" (automatic)";
 		
 		return ret;
+	}
+	
+	/**
+	 * returns true if this indexnode was automatically started inside another client
+	 * @return
+	 */
+	public boolean isAutomatic() {
+		return isAutomaticNode;
 	}
 	
 	/**
@@ -543,6 +553,7 @@ public class IndexNode {
 					return;
 				}
 				amAdmin = Boolean.parseBoolean(conn.getHeaderField("fs2-indexnodeadmin"));
+				isAutomaticNode = Boolean.parseBoolean(conn.getHeaderField("fs2-automatic"));
 				
 				String indexNodeAvatar = conn.getHeaderField("fs2-avatarhash");
 				String nAvatarHash = ssvr.getIndexNodeCommunicator().encodedAvatarMD5;
@@ -793,6 +804,7 @@ public class IndexNode {
 				
 			} catch (IOException e) {
 				Logger.warn("Unable to get stats from indexnode '"+getName()+"': "+e);
+				contactIndexNode();
 			} catch (Exception e) {
 				Logger.warn("Malformed or broken stats from indexnode '"+getName()+"': "+e);
 				e.printStackTrace();
@@ -837,6 +849,7 @@ public class IndexNode {
 			//The empty list is returned and this is correct.
 		} catch (IOException e) {
 			Logger.warn("Couldn't get updated filelists from indexnode '"+getName()+"': "+e);
+			contactIndexNode();
 		} catch (Exception e) {
 			Logger.warn("Couldn't get updated filelists from indexnode '"+getName()+"': "+e);
 			e.printStackTrace();
@@ -1036,6 +1049,10 @@ public class IndexNode {
 	
 	public InputStream getClientAvatarStream(String iconhash) throws IOException {
 		return getInputStreamFromIndexnode(getAvatarIconURL(iconhash));
+	}
+
+	public boolean isActive() {
+		return status==Status.ACTIVE;
 	}
 
 	

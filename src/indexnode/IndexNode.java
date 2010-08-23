@@ -23,6 +23,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -300,7 +301,7 @@ public class IndexNode {
 		}
 		
 		public void clientSaidHello(SimpleClientInfo info) {
-			Logger.log("Hello received from: "+alias);
+			//Logger.log("Hello received from: "+alias);
 			//We've seen from them again, so reset the failed liveness.
 			failedLiveness = 0;
 			//update clToken, it might have changed:
@@ -813,15 +814,16 @@ public class IndexNode {
 	 * @throws Exception
 	 */
 	public IndexNode(Config conf) throws Exception {
-		this(conf, false);
+		this(conf, false, "");
 	}
 	
 	/**
-	 * Constructs a new IndexNode server.
+	 * Constructs a new IndexNode server. This constructor is for internal indexnodes.
 	 * @param confFile The configuration file to use for this indexnode.
 	 * @param internal true iff this is executing within a client;
+	 * @param pathPrefix the directory into which indexnode things can be stored.
 	 */
-	public IndexNode(final Config conf, boolean internal) throws Exception {
+	public IndexNode(final Config conf, boolean internal, String pathPrefix) throws Exception {
 		this.conf = conf;
 		
 		//Initialise filesystem:
@@ -833,7 +835,7 @@ public class IndexNode {
 		onPort = conf.getInt(IK.PORT);
 		
 		//Load users database:
-		users = new UserDatabase(new File(conf.getString(IK.USER_DATABSE)), this);
+		users = new UserDatabase(new File(pathPrefix+conf.getString(IK.USER_DATABSE)), this);
 		
 		//security things
 		dhanonUsed = Boolean.parseBoolean(conf.getString(IK.DHANON_TLS));
@@ -860,7 +862,7 @@ public class IndexNode {
 		downloader = new IndexDownloader(fs);
 		ic = new IndexChat(chat, this);
 		alts = new IndexAlternatives(fs);
-		avatar = new IndexAvatar(new File(conf.getString(IK.AVATAR_CACHE_PATH)), this);
+		avatar = new IndexAvatar(new File(pathPrefix+conf.getString(IK.AVATAR_CACHE_PATH)), this);
 		
 		String bindTo = conf.getString(IK.BIND_INTERFACE);
 		
@@ -880,14 +882,15 @@ public class IndexNode {
 		//internal indexnodes do not advertise themselves.
 		if (!internal && conf.getBoolean(IK.ADVERTISE)) {
 			final long advertuid = conf.getLong(IK.ADVERTUID);
+			final long capability = generateCapabilityValue();
 			advertManager = new IndexAdvertismentManager(conf, new AdvertDataSource() {
 				
 				/**
-				 * Not prospective if a real, life static instance node.
+				 * Real, standalone indexnodes are always prospective. (because they always run, and want to inhibit worse autoindexnodes)
 				 */
 				@Override
 				public boolean isProspectiveIndexnode() {
-					return false;
+					return true;
 				}
 				
 				@Override
@@ -896,11 +899,11 @@ public class IndexNode {
 				}
 				
 				/**
-				 * Makes no sense for an existing indexnode.
+				 * Return our capability.
 				 */
 				@Override
 				public long getIndexValue() {
-					return 0;
+					return capability;
 				}
 				
 				@Override
@@ -914,6 +917,18 @@ public class IndexNode {
 				}
 			});
 		}
+	}
+	
+	public static long generateCapabilityValue() {
+		Random r = new Random();
+		
+		//round to the nearest 100k
+		long c = Runtime.getRuntime().maxMemory()/100000; 
+		c *= 100000;
+		
+		c += (Math.abs(r.nextLong())%100000); //add noise to the end of the number.
+		
+		return c;
 	}
 	
 	public IndexAdvertismentManager getAdvertManager() {
@@ -1020,6 +1035,10 @@ public class IndexNode {
 
 	public void setAlias(String newAlias) {
 		fs2Filter.setAlias(newAlias);
+	}
+
+	public void setAutomatic(boolean b) {
+		fs2Filter.setAutomatic(b);
 	}
 	
 }

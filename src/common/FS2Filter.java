@@ -64,6 +64,7 @@ public class FS2Filter extends Filter {
 	private String alias = "Unnamed";
 	private int port = 0;
 	private long queuetoken = 0;
+	private boolean automaticIndexnode;
 	
 	public FS2Filter() {
 		Random gen = new Random();
@@ -87,6 +88,7 @@ public class FS2Filter extends Filter {
 		h.add("fs2-version", FS2Constants.FS2_PROTOCOL_VERSION);
 		h.add("fs2-port", Integer.toString(port));
 		h.add("fs2-alias", alias);
+		if (automaticIndexnode) h.add("fs2-automatic", "true");
 		chain.doFilter(exchange);
 	}
 
@@ -106,6 +108,10 @@ public class FS2Filter extends Filter {
 			Logger.severe("Can't securify URL: "+insecureURL.toString()+", "+e);
 			return null;
 		}
+	}
+
+	public void setAutomatic(boolean b) {
+		automaticIndexnode = b;
 	}
 	
 }

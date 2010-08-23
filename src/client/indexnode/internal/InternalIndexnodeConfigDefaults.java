@@ -1,5 +1,8 @@
 package client.indexnode.internal;
 
+import client.platform.ClientConfigDefaults.CK;
+import common.Config;
+
 import indexnode.IndexConfigDefaults;
 
 /**
@@ -12,7 +15,10 @@ public class InternalIndexnodeConfigDefaults extends IndexConfigDefaults {
 		
 	}
 	
-	public InternalIndexnodeConfigDefaults() {
+	public InternalIndexnodeConfigDefaults(Config clientConfig) {
 		super();
+		
+		defaults.put(IIK.ALIAS, clientConfig.getString(CK.ALIAS));
+		
 	}
 }

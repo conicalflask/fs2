@@ -267,6 +267,9 @@ public class IndexNodeCommunicator implements TableModel {
 	 * Shuts this indexnode communicator down gracefully.
 	 */
 	public void shutdown() {
+		//Shutdown the internal indexnode:
+		iim.shutdown();
+		
 		synchronized(nodes) {
 			for (IndexNode sd : nodes) {
 				sd.shutdown();
@@ -613,5 +616,47 @@ public class IndexNodeCommunicator implements TableModel {
 			Logger.warn("Exception dispatching notifyIndexNodeChanged(): "+e);
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Returns true if there is an active-connected indexnode that was not autodetected.
+	 * @return
+	 */
+	public boolean isAStaticIndexnodeActive() {
+		synchronized (nodes) {
+			for (IndexNode n : nodes) {
+				if (!n.wasAdvertised() && n.isActive()) return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns true if there is an active-connected indexnode that is not our own internal node.
+	 * @return
+	 */
+	public boolean isConnectedToARemoteAutodetectedIndexnode() {
+		synchronized (nodes) {
+			for (IndexNode n : nodes) {
+				if (n.isActive() && n.getAdvertuid()!=iim.getAdvertUID() && n.wasAdvertised()) return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * When an internal indexnode is shutdown this is called to remove it from the client part of the system quickly.s
+	 */
+	public void notifyInternalIndexnodeShutdown() {
+		IndexNode thenode = null;
+		synchronized (nodes) {
+			for (IndexNode n : nodes) {
+				if (n.getAdvertuid()==iim.getAdvertUID()) {
+					thenode = n;
+					break;
+				}
+			}
+		}
+		if (thenode!=null) deregisterIndexNode(thenode);
 	}
 }

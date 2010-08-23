@@ -304,7 +304,7 @@ public abstract class Util {
 	 * 
 	 * Also note that this is not a scheduler, if this function returns false the Runnable is neither executed now nor asynchronously in the future.
 	 * 
-	 * @param minInterval The minimum duration in millisecons between invokcations of the task supplied.
+	 * @param minInterval The minimum duration in milliseconds between invocations of the task supplied.
 	 * @param task The runnable to execute not more often than specified. This MUST be the same object (by .equals) each time or it will be executed without regard to the time.
 	 * @return true iff the task was executed now, false if the task was not executed.
 	 */

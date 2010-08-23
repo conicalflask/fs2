@@ -75,6 +75,9 @@ public class FS2Constants {
 	/**How often should the indexnode advertise itself? (2 seconds)*/
 	public static final int INDEXNODE_ADVERTISE_INTERVAL_MS = 2*1000;
 	
+	/** how often should an internal indexnode consider if it should run? */
+	public static final int INTERNAL_INDEXNODE_RECONSIDER_INTERVAL_MS = INDEXNODE_ADVERTISE_INTERVAL_MS*3;
+	
 	/**How often should the indexnode cache statistics for? (10 seconds)*/
 	public static final int INDEXNODE_CACHE_STATISTICS_DURATION = 1000*10;
 	

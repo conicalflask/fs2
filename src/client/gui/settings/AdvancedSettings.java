@@ -51,12 +51,25 @@ public class AdvancedSettings extends SettingsPanel {
 		boxes.add(createSlotsPanel());
 		boxes.add(autoupdatePanel());
 		boxes.add(heapSizePanel());
+		boxes.add(autoindexnodePanel());
 		boxes.add(portPanel());
 		boxes.add(resetToDefaultsPanel());
 		//###### no more items.
 		
 	}
 
+	JLabel autoindexInfo;
+	
+	private JPanel autoindexnodePanel() {
+		JPanel ret = new JPanel(new BorderLayout());
+		ret.setBorder(getTitledBoldBorder("Internal indexnode"));
+		
+		autoindexInfo = new JLabel();
+		//TODO: carry on.
+		
+		return ret;
+	}
+	
 	private JPanel createSlotsPanel() {
 		JPanel ret = new JPanel(new BorderLayout());
 		ret.setBorder(getTitledBoldBorder("Transfer slots"));
