@@ -80,6 +80,7 @@ public class IndexAdvertiser extends Thread {
 	}
 	
 	public void shutdown() {
+		socket.close();
 		shutdown = true;
 	}
 	

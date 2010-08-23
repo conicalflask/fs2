@@ -116,7 +116,8 @@ public class SettingsTab extends TabItem implements PropertyChangeListener,
 		int tableIndex = 0;
 		for (SettingsPanel s : settings) {
 			if (s.getClass().getSimpleName().equals(settingClass)) {
-				ft.getSelectionModel().setSelectionInterval(tableIndex, tableIndex);
+				int index = ft.convertRowIndexToView(tableIndex);
+				ft.getSelectionModel().setSelectionInterval(index, index);
 				return;
 			} else {
 				tableIndex++;
@@ -132,7 +133,8 @@ public class SettingsTab extends TabItem implements PropertyChangeListener,
 		int tableIndex = 0;
 		for (SettingsPanel s : settings) {
 			if (s.getClass() == settingClass) {
-				ft.getSelectionModel().setSelectionInterval(tableIndex, tableIndex);
+				int index = ft.convertRowIndexToView(tableIndex);
+				ft.getSelectionModel().setSelectionInterval(index, index);
 				return;
 			} else {
 				tableIndex++;
@@ -150,8 +152,9 @@ public class SettingsTab extends TabItem implements PropertyChangeListener,
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
 		if (ft.getSelectedRowCount()>0) {
-			cards.show(rightHand, settings.get(ft.getSelectedRow()).getClass().getSimpleName());
-			frame.getGui().getConf().putString(CK.SETTINGS_ACTIVE_PANEL, settings.get(ft.getSelectedRow()).getClass().getSimpleName());
+			int index = ft.convertRowIndexToModel(ft.getSelectedRow());
+			cards.show(rightHand, settings.get(index).getClass().getSimpleName());
+			frame.getGui().getConf().putString(CK.SETTINGS_ACTIVE_PANEL, settings.get(index).getClass().getSimpleName());
 		}
 	}
 }

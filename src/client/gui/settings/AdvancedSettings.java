@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -33,15 +34,18 @@ import client.ClientExecutor;
 import client.gui.JBytesBox;
 import client.gui.MainFrame;
 import client.gui.MainFrame.StatusHint;
+import client.indexnode.internal.InternalIndexnodeManager;
 import client.platform.Relauncher;
 import client.platform.ClientConfigDefaults.CK;
 
 @SuppressWarnings("serial")
 public class AdvancedSettings extends SettingsPanel {
 
+	InternalIndexnodeManager iim = frame.getGui().getShareServer().getIndexNodeCommunicator().getInternalIndexNode();
+	
 	public AdvancedSettings(MainFrame frame) {
 		super(frame, "Advanced", frame.getGui().getUtil().getImage("advanced"));
-		
+				
 		JPanel boxes = createScrollableBoxlayout();
 		
 		//###### actual items go here:
@@ -65,9 +69,51 @@ public class AdvancedSettings extends SettingsPanel {
 		ret.setBorder(getTitledBoldBorder("Internal indexnode"));
 		
 		autoindexInfo = new JLabel();
-		//TODO: carry on.
+		updateAutoIndexnodeInfo();
+		
+		ret.add(autoindexInfo, BorderLayout.NORTH);
+		
+		final JCheckBox autoindex = new JCheckBox("become an indexnode if needed", iim.isAutoIndexnodeEnabled());
+		autoindex.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				iim.setAutoIndexnode(autoindex.isSelected());
+				updateAutoIndexnodeInfo();
+			}
+		});
+		
+		final JCheckBox always = new JCheckBox("always run an indexnode", iim.isAlwaysOn());
+		always.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				iim.setAlwaysOn(always.isSelected());
+				updateAutoIndexnodeInfo();
+			}
+		});
+		
+		ret.add(autoindex, BorderLayout.WEST);
+		ret.add(always, BorderLayout.EAST);
 		
 		return ret;
+	}
+	
+	private void updateAutoIndexnodeInfo() {
+		String status;
+		
+		if (iim.isCurrentlyActive()) {
+			status = "active";
+		} else if (iim.isAutoIndexNodeInhibited()) {
+			status = "inhibited";
+		} else if (iim.isAutoIndexnodeEnabled()) {
+			status = "inactive";
+		} else {
+			status = "disabled";
+		}
+		
+		String positionInfo = (iim.getRank()!=0 && (status.equals("inactive") || status.equals("active")) ? "<br>Our automatic indexnode rank is <b>"+iim.getRank()+"</b> out of <b>"+iim.getAlternativeNodes()+"</b>." : "");
+		
+		autoindexInfo.setText("<html>The internal indexnode is: <b>"+status+"</b>" + positionInfo +
+				              "</html>");
 	}
 	
 	private JPanel createSlotsPanel() {
@@ -203,6 +249,7 @@ public class AdvancedSettings extends SettingsPanel {
 			public void actionPerformed(ActionEvent e) {
 				setHeapInfo();
 				setPortNumberInfo();
+				updateAutoIndexnodeInfo();
 			}
 		});
 		infoTimer.start();
@@ -225,7 +272,7 @@ public class AdvancedSettings extends SettingsPanel {
 	
 	private void setHeapInfo() {
 		heapInfo.setText("<html>Active JVM maximum heap size: <b>"+Util.niceSize(Runtime.getRuntime().maxMemory())+"</b><br>" +
-		         "Current heap usage: <b>"+Util.niceSize(Runtime.getRuntime().totalMemory())+"</b><br>" +
+		         "Current heap usage: <b>"+Util.niceSize(Runtime.getRuntime().maxMemory()-Runtime.getRuntime().freeMemory())+"</b><br>" +
 		         "Configured maximum heap size:");
 	}
 	

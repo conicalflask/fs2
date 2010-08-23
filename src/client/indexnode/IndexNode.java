@@ -791,12 +791,12 @@ public class IndexNode {
 							stats.peers.put(alias,new IndexNodeClient(elem.getAttribute("fs2-clientalias"), Long.parseLong(elem.getAttribute("value")), elem.getAttribute("avatarhash"), IndexNode.this));
 							newPeers = true;
 						}
-						
-						if (newPeers) ssvr.getIndexNodeCommunicator().notifyNewPeersPresent();
-						
-						//now remove peers that were not in the indexnode's list:
-						for (String deadPeer : knownAliases) stats.peers.remove(deadPeer);
 					}
+
+					if (newPeers) ssvr.getIndexNodeCommunicator().notifyNewPeersPresent();
+					
+					//now remove peers that were not in the indexnode's list:
+					for (String deadPeer : knownAliases) stats.peers.remove(deadPeer);
 					
 				}
 				

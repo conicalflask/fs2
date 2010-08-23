@@ -28,6 +28,7 @@ public class Version {
 	 */
 	static {
 		FS2_VERSION_DESCRIPTIONS = new HashMap<String, String>();
+		FS2_VERSION_DESCRIPTIONS.put("0.8.27", "Now with working internal indexnode and a fully complete settings tab.");
 		FS2_VERSION_DESCRIPTIONS.put("0.8.26", "Settings tab is mostly complete, auto indexnode is also complete. (just need settings for AIN now.");
 		FS2_VERSION_DESCRIPTIONS.put("0.8.25", "Good progress being made on the settings tab...");
 		FS2_VERSION_DESCRIPTIONS.put("0.8.24", "Settings tab on the way. This is a work in progress. Completion will move to 0.9");
@@ -49,7 +50,7 @@ public class Version {
 	/** The version identifier for the client.
 	 * This is used by the client to identify new versions 
 	 * DONT FORGET TO DESCRIBE THIS VERSION! */
-	public static final Integer[] FS2_CLIENT_VERSION_BITS = {0,8,26};
+	public static final Integer[] FS2_CLIENT_VERSION_BITS = {0,8,27};
 	
 	//Into a string:
 	public static final String FS2_CLIENT_VERSION() { return Util.join(FS2_CLIENT_VERSION_BITS,"."); }

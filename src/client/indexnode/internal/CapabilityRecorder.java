@@ -1,6 +1,7 @@
 package client.indexnode.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 
 import common.FS2Constants;
@@ -15,8 +16,8 @@ import common.Util.Deferrable;
  */
 public class CapabilityRecorder {
 
-	private class CapabilityRecord {
-		long capability;
+	private class CapabilityRecord implements Comparable<CapabilityRecord> {
+		Long capability;
 		final long advertuid;
 		long lastReceived;
 		
@@ -44,10 +45,39 @@ public class CapabilityRecorder {
 		public String toString() {
 			return "[c:"+capability+"]";
 		}
+
+		@Override
+		public int compareTo(CapabilityRecord o) {
+			return o.capability.compareTo(capability);
+		}
 	}
 	
 	//Arraylist for fast iteration over a small number of records. Infrequent insertion and deletion.s
 	private ArrayList<CapabilityRecord> records = new ArrayList<CapabilityRecord>(50);
+	private CapabilityRecord us;
+	private final long ourAUID;
+	
+	public CapabilityRecorder(long advertuid) {
+		ourAUID = advertuid;
+	}
+	
+	/**
+	 * Returns the number of auto-indexnode capable clients visible to this client
+	 * @return
+	 */
+	public synchronized int getRecordCount() {
+		return records.size();
+	}
+	
+	/**
+	 * Returns this client's capability rank
+	 * returns 0 if we have no rank.
+	 * @return
+	 */
+	public synchronized int getRank() {
+		Collections.sort(records);
+		return records.indexOf(us)+1;
+	}
 	
 	/**
 	 * Records a capability claim from another client.
@@ -80,6 +110,7 @@ public class CapabilityRecorder {
 					cri.remove(); 
 					continue;
 				}
+				if (cr.advertuid==ourAUID) us = cr;
 				if (cr.capability>winnerCapability) {
 					winnerAdvertUID = cr.advertuid;
 					winnerCapability = cr.capability;
@@ -114,8 +145,8 @@ public class CapabilityRecorder {
 	 * @param myAUID
 	 * @return
 	 */
-	public synchronized boolean amIMostCapable(long myCapability, long myAUID) {
-		return myCapability>getGreatestRecentCapability() || myAUID==getWinnerAUID();
+	public synchronized boolean amIMostCapable(long myCapability) {
+		return myCapability>getGreatestRecentCapability() || ourAUID==getWinnerAUID();
 	}
 	
 	private long winnerAdvertUID = 0;

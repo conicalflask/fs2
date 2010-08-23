@@ -57,7 +57,7 @@ public class InternalIndexnodeManager {
 
 		@Override
 		public boolean isProspectiveIndexnode() {
-			return isAutoIndexnodeEnabled() && !isAutoIndexNodeInhibited();
+			return (isAutoIndexnodeEnabled() && !isAutoIndexNodeInhibited()) || isCurrentlyActive();
 		}
 	}
 	
@@ -82,7 +82,7 @@ public class InternalIndexnodeManager {
 		//2) listen for capability adverts from other autoindexnodes:
 		capability = IndexNode.generateCapabilityValue();
 		
-		cr = new CapabilityRecorder();
+		cr = new CapabilityRecorder(getAdvertUID());
 		
 		//3) start an indexnode if configured to always run one
 		if (isAlwaysOn()) ensureIndexnode();
@@ -126,12 +126,13 @@ public class InternalIndexnodeManager {
 	 * 
 	 */
 	private void considerNecessity() {
+		if (isAlwaysOn()) return; //Nothing need be done if always on.
 		//1) Think about starting an indexnode:
 		// --must meet three critera:
 			//a) Automatic indexnode enabled.
 			//b) not connected to any indexnodes at all.
 			//c) must be the most capable applicant in the area.
-		if (isAutoIndexnodeEnabled() && !isAutoIndexNodeInhibited() && cr.amIMostCapable(getCapability(), getAdvertUID())) {
+		if (isAutoIndexnodeEnabled() && !isAutoIndexNodeInhibited() && cr.amIMostCapable(getCapability())) {
 			ensureIndexnode();
 			executingNode.setAutomatic(true);
 		}
@@ -142,12 +143,8 @@ public class InternalIndexnodeManager {
 			//a) Not running an auto indexnode
 			//b) OR inhibited now (by a statically configured, connected indexnode)
 			//c) OR (connected to another non-static indexnode AND we're not the top of the league table)
-			//AND NOT:
-			//) in always running mode.
-		if (!isAlwaysOn()) {
-			if (!isAutoIndexnodeEnabled() || isAutoIndexNodeInhibited() || (comm.isConnectedToARemoteAutodetectedIndexnode() && !cr.amIMostCapable(getCapability(), getAdvertUID()))){
-				stopIndexnode();
-			}
+		if (!isAutoIndexnodeEnabled() || isAutoIndexNodeInhibited() || (comm.isConnectedToARemoteAutodetectedIndexnode() && !cr.amIMostCapable(getCapability()))){
+			stopIndexnode();
 		}
 	}
 	
@@ -197,6 +194,18 @@ public class InternalIndexnodeManager {
 		return comm.getConf().getBoolean(CK.INTERNAL_INDEXNODE_ALWAYS_ON);
 	}
 	
+	public void setAlwaysOn(boolean enabled) {
+		comm.getConf().putBoolean(CK.INTERNAL_INDEXNODE_ALWAYS_ON, enabled);
+		if (enabled) {
+			ensureIndexnode();
+			executingNode.setAutomatic(false);
+		} else {
+			stopIndexnode();
+		}
+		
+		setupAdvertisers();
+	}
+	
 	/**
 	 * Returns true if the internal indexnode is currently active (ie: other peers could connect to it)
 	 * @return
@@ -235,16 +244,18 @@ public class InternalIndexnodeManager {
 	}
 	
 	private void setupAdvertisers() {
-		if (isAutoIndexnodeEnabled()) {
+		if (isAutoIndexnodeEnabled() || isAlwaysOn()) {
 			try {
-				advertManager = new IndexAdvertismentManager(nodeConfig, new AdsImpl());
+				if (advertManager==null) advertManager = new IndexAdvertismentManager(nodeConfig, new AdsImpl());
 			} catch (Exception e) {
 				Logger.warn("Unable to build advertisment framework: "+e);
 				e.printStackTrace();
 			}
 		} else {
-			advertManager.shutdown();
-			advertManager = null;
+			if (advertManager!=null) {
+				advertManager.shutdown();
+				advertManager = null;
+			}
 		}
 	}
 	
@@ -272,6 +283,22 @@ public class InternalIndexnodeManager {
 		considerationTimer.cancel();
 		if (advertManager!=null) advertManager.shutdown();
 		stopIndexnode();
+	}
+
+	/**
+	 * Returns our rank in all possible automatic indexnodes or 0 if we have no rank.
+	 * @return
+	 */
+	public int getRank() {
+		return cr.getRank();
+	}
+
+	/**
+	 * Returns the number of automatic indexnodes detectable by this client.
+	 * @return
+	 */
+	public int getAlternativeNodes() {
+		return cr.getRecordCount();
 	}
 	
 }
