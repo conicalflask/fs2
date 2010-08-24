@@ -94,7 +94,7 @@ public class InternalIndexnodeManager {
 			public void run() {
 				considerNecessity();
 			}
-		}, FS2Constants.INTERNAL_INDEXNODE_RECONSIDER_INTERVAL_MS, FS2Constants.INTERNAL_INDEXNODE_RECONSIDER_INTERVAL_MS);
+		}, FS2Constants.INTERNAL_INDEXNODE_RECONSIDER_INTERVAL_MS /* wait initially to prevent premature indexnode starting.*/, FS2Constants.INTERNAL_INDEXNODE_RECONSIDER_INTERVAL_MS);
 	}
 	
 	/**
@@ -129,10 +129,11 @@ public class InternalIndexnodeManager {
 		if (isAlwaysOn()) return; //Nothing need be done if always on.
 		//1) Think about starting an indexnode:
 		// --must meet three critera:
-			//a) Automatic indexnode enabled.
-			//b) not connected to any indexnodes at all.
-			//c) must be the most capable applicant in the area.
-		if (isAutoIndexnodeEnabled() && !isAutoIndexNodeInhibited() && cr.amIMostCapable(getCapability())) {
+			//a) Automatic indexnode enabled. AND
+			//b) not inhibited by a statically configured indexnode AND
+			//c) must be the most capable applicant in the area. OR we're not connected to the most capable, but are configured to do so.
+		// whoa!
+		if (isAutoIndexnodeEnabled() && !isAutoIndexNodeInhibited() && (cr.amIMostCapable(getCapability()) || (!comm.isConnectedToARemoteAutodetectedIndexnode() && comm.isListeningForAdverts()))) {
 			ensureIndexnode();
 			executingNode.setAutomatic(true);
 		}
@@ -156,8 +157,7 @@ public class InternalIndexnodeManager {
 	/**
 	 * Returns true if this internal indexnode wont run because the client is already connected to a non-detected indexnode.
 	 * 
-	 * This is to prevent the autoindexnode from advertising it will run automatically when actually it never will.
-	 * 
+	 * <br>This is to prevent the autoindexnode from advertising it will run automatically when actually it never will.
 	 * @return
 	 */
 	public boolean isAutoIndexNodeInhibited() {

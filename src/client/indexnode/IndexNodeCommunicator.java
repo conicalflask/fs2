@@ -116,8 +116,12 @@ public class IndexNodeCommunicator implements TableModel {
 		return ssvr;
 	}
 	
+	/**
+	 * True if this indexnodecommunicator will automatically detect indexnodes.
+	 * @return
+	 */
 	public boolean isListeningForAdverts() {
-		return listener!=null;
+		return autodetectIndexnodes;
 	}
 	
 	public IndexNodeCommunicator(ShareServer ssvr, Config conf) {
@@ -472,11 +476,12 @@ public class IndexNodeCommunicator implements TableModel {
 		}
 	}
 
-	private Class<?>[] columnClasses = {String.class, String.class, Date.class}; //Name, status, last-seen
-	private String[] columnNames = {"Name", "Status", "Last-seen"};
+	private Class<?>[] columnClasses = {String.class, String.class, Date.class, String.class}; //Name, status, last-seen, location
+	private String[] columnNames = {"Name", "Status", "Last-seen", "Location"};
 	private static final int NAME_IDX=0;
 	private static final int STATUS_IDX=1;
 	private static final int LASTSEEN_IDX=2;
+	private static final int LOCATION_IDX=3;
 	
 	
 	@Override
@@ -519,6 +524,9 @@ public class IndexNodeCommunicator implements TableModel {
 			return node.getStatusDescription();
 		} else if (columnIndex==LASTSEEN_IDX) {
 			return node.getLastSeen();
+		} else if (columnIndex==LOCATION_IDX) {
+			int port = node.getActiveLocation().getPort();
+			return node.getActiveLocation().getHost()+(port!=-1 ? ":"+node.getActiveLocation().getPort() : "");
 		} else return "Column index invalid";
 	}
 
