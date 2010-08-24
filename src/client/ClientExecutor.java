@@ -66,7 +66,7 @@ public class ClientExecutor {
 			
 			
 			// Now we have the config we can check to see if we have inadequate heap:
-			if (Runtime.getRuntime().maxMemory()<(conf.getLong(CK.HEAPSIZE)*0.9)) {
+			if (Runtime.getRuntime().maxMemory()<(conf.getLong(CK.HEAPSIZE)*0.9) && System.getProperty("increasedheap")==null) {
 				if (Relauncher.increaseHeap(conf.getLong(CK.HEAPSIZE), true)) {
 					return; //hopefully the large-jvm subprocess was a success. no easy way to tell programmatically.
 				} else {

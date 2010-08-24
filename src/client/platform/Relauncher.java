@@ -109,7 +109,7 @@ public class Relauncher {
 				if (System.getProperty(property)!=null) args.add("-D"+property+"="+System.getProperty(property));
 			}
 			
-			args.add("-Dincreasedheap");
+			if (pipeThrough) args.add("-Dincreasedheap"); //when piping through add a new system property to prevent looping restarts.
 			
 			args.add("-jar");
 			args.add(thisJarPath);
