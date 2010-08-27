@@ -3,8 +3,8 @@ package client.gui;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -77,7 +77,7 @@ public class ChatTab extends TabItem implements TableModelListener {
 	private JTabbedPane createChatPane(){
 		chatTabs = new JTabbedPane();;
 		
-		ArrayList<IndexNode> connectedIndexNodes = comm.getRegisteredIndexNodes(); 
+		List<IndexNode> connectedIndexNodes = comm.getRegisteredIndexNodes(); 
 		
 		if (connectedIndexNodes.isEmpty()){
 			addNotConnectedTab();
@@ -100,7 +100,7 @@ public class ChatTab extends TabItem implements TableModelListener {
 	@Override
 	public void tableChanged(TableModelEvent e) {
 		int row;
-		ArrayList<IndexNode> indexNodes = comm.getRegisteredIndexNodes();
+		List<IndexNode> indexNodes = comm.getRegisteredIndexNodes();
 		NodeChatTab tab;
 		IndexNode node;
 		

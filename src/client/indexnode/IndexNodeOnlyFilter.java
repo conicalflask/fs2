@@ -34,7 +34,7 @@ public class IndexNodeOnlyFilter extends Filter {
 			//and hope this works because there is a very good chance that
 			//whatever caused the indexnode to be poking us has a lock on the node list already
 			//(and taking it here just causes deadlock). grumbles.
-			LinkedList<IndexNode> nodes = new LinkedList<IndexNode>(comm.nodes);
+			LinkedList<IndexNode> nodes = new LinkedList<IndexNode>(comm.getRegisteredIndexNodes());
 			for (IndexNode node : nodes) {
 				if (node.fromThisIndexnode(ex)) { //If an indexnode client accepts this indexnode then the request may be served.
 					canContinue = true;

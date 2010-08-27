@@ -442,7 +442,7 @@ public class IndexNode {
 	 * Notifies the indexnode if anything has changed on this client.
 	 */
 	void notifyIndexNode() {
-		contactIndexNode();
+		if (status==Status.ACTIVE) contactIndexNode(); //only bother notifying active indexnodes.
 	}
 	
 	/**

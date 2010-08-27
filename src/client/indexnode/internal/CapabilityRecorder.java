@@ -38,7 +38,7 @@ public class CapabilityRecorder {
 		 * @return
 		 */
 		public boolean isExpired() {
-			return lastReceived < (System.currentTimeMillis()-FS2Constants.INDEXNODE_ADVERTISE_INTERVAL_MS*5);
+			return lastReceived < (System.currentTimeMillis()-FS2Constants.INDEXNODE_CAPABILITY_TABLE_DECAY);
 		}
 		
 		@Override

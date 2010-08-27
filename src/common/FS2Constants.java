@@ -72,11 +72,14 @@ public class FS2Constants {
 	/**The maximum number of search results to return to a client*/
 	public static final int INDEXNODE_SEARCH_MAX_RESULTS = 200;
 	
-	/**How often should the indexnode advertise itself? (2 seconds)*/
-	public static final int INDEXNODE_ADVERTISE_INTERVAL_MS = 2*1000;
+	/**How often should the indexnode advertise itself? (a second)*/
+	public static final int INDEXNODE_ADVERTISE_INTERVAL_MS = 1*1000;
 	
 	/** how often should an internal indexnode consider if it should run? */
-	public static final int INTERNAL_INDEXNODE_RECONSIDER_INTERVAL_MS = INDEXNODE_ADVERTISE_INTERVAL_MS*3;
+	public static final int INTERNAL_INDEXNODE_RECONSIDER_INTERVAL_MS = 4000;
+	
+	/** how long should the capability table last for before entries are dropped?*/
+	public static final int INDEXNODE_CAPABILITY_TABLE_DECAY = 20*1000;
 	
 	/**How often should the indexnode cache statistics for? (10 seconds)*/
 	public static final int INDEXNODE_CACHE_STATISTICS_DURATION = 1000*10;
@@ -148,4 +151,6 @@ public class FS2Constants {
 	public static final int FS2_AVATAR_ICON_SIZE = 64;
 
 	public static final String[] CLIENT_IMPORTANT_SYSTEM_PROPERTIES = {"headless", "java.awt.headless", "platform", "update"};
+
+	
 }

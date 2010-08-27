@@ -334,11 +334,12 @@ public class Share {
 	}
 	
 	private void refreshComplete() {
+		ssvr.getIndexNodeCommunicator().sharesChanged(); //returns immediately.
+		
 		list.setRefreshedNow();
 		if (saveList()) {
 			setStatus(Status.ACTIVE);	
 		}
-		ssvr.getIndexNodeCommunicator().sharesChanged();
 	}
 	
 	public synchronized void shutdown() {

@@ -154,14 +154,19 @@ public class InternalIndexnodeManager {
 		return capability;
 	}
 	
+	private volatile boolean inhibitCached;
 	/**
 	 * Returns true if this internal indexnode wont run because the client is already connected to a non-detected indexnode.
 	 * 
 	 * <br>This is to prevent the autoindexnode from advertising it will run automatically when actually it never will.
 	 * @return
 	 */
-	public boolean isAutoIndexNodeInhibited() {
-		return comm.isAStaticIndexnodeActive();
+	boolean isAutoIndexNodeInhibited() {
+		return (inhibitCached = comm.isAStaticIndexnodeActive());
+	}
+	
+	public boolean isAutoIndexNodeInhibitedAWTSAFE() {
+		return inhibitCached;
 	}
 	
 	/**

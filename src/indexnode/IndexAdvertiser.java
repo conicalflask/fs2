@@ -36,6 +36,7 @@ public class IndexAdvertiser extends Thread {
 		this.sock = sock;
 		setDaemon(true);
 		socket = new DatagramSocket(sock);
+		setName("advertiser");
 		start();
 	}
 	

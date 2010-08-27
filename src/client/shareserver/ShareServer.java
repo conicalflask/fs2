@@ -6,7 +6,9 @@ import java.net.InetSocketAddress;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
@@ -279,7 +281,7 @@ public class ShareServer implements TableModel {
 	
 	private HttpServer http;
 	private IndexNodeCommunicator communicator;
-	private ArrayList<Share> shares = new ArrayList<Share>();
+	private List<Share> shares = Collections.synchronizedList(new ArrayList<Share>());
 	private Timer shareRefreshTimer;
 	private Config conf;
 	private ThreadPoolExecutor shareRefreshPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(1, new NamedThreadFactory(true, "Share refresh thread."));
@@ -527,9 +529,9 @@ public class ShareServer implements TableModel {
 	/**
 	 * Returns a map of share names onto share objects.
 	 * This is is the actual data structure used by the shareserver, so don't mess it up.
-	 * Also, make sure to synchronize around it for reading as the shareserver is highly multithreaded.
+	 * This returns a syncrhonized list, but make sure to synchronize again if iterating.
 	 */
-	public ArrayList<Share> getShares() {
+	public List<Share> getShares() {
 		return shares;
 	}
 	
@@ -685,9 +687,7 @@ public class ShareServer implements TableModel {
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		Share share = null;
-		synchronized (shares) {
-			share = shares.get(rowIndex);
-		}
+		share = shares.get(rowIndex);
 		switch (columnIndex) {
 		case NAME_IDX:
 			return share.getName();
@@ -735,9 +735,7 @@ public class ShareServer implements TableModel {
 	
 	void notifyShareChanged(Share share) {
 		int rowidx = -1;
-		synchronized (shares) {
-			rowidx = shares.indexOf(share);
-		}
+		rowidx = shares.indexOf(share);
 		if (rowidx==-1) {
 			//this is possible as shares can change status before they are in the list.
 			return;

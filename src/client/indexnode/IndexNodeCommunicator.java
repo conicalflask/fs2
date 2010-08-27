@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,7 +57,7 @@ import client.shareserver.Share.Status;
  */
 public class IndexNodeCommunicator implements TableModel {
 
-	ArrayList<IndexNode> nodes = new ArrayList<IndexNode>();
+	private List<IndexNode> nodes = Collections.synchronizedList(new ArrayList<IndexNode>());
 	AdvertListener listener = null;
 	boolean autodetectIndexnodes = false;
 	ShareServer ssvr = null;
@@ -187,7 +188,7 @@ public class IndexNodeCommunicator implements TableModel {
 	/**
 	 * @return the indexnodes that we are communicating with presently.
 	 */
-	public ArrayList<IndexNode> getRegisteredIndexNodes() {
+	public List<IndexNode> getRegisteredIndexNodes() {
 		return nodes;
 	}
 	
@@ -412,16 +413,30 @@ public class IndexNodeCommunicator implements TableModel {
 	
 	/**
 	 * Notify the indexnodes that the shares on this client have been updated somehow.
+	 * Returns immediately.
 	 */
 	public void sharesChanged() {
-		//1) build a new filelist.xml
-		buildShareListXML();
-		//2) notify each indexnode.
-		synchronized (nodes) {
-			for (IndexNode node : nodes) {
-				node.notifyIndexNode();
-			}
-		}
+//		Thread asynchronousNotifier = new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+		
+				//1) build a new filelist.xml
+				buildShareListXML();
+				//2) notify each indexnode.
+				List<IndexNode> nodesCopy = new ArrayList<IndexNode>();
+				synchronized (nodes) {
+					nodesCopy.addAll(nodes);
+				}
+				for (IndexNode node : nodesCopy) {
+					node.notifyIndexNode();
+				}
+				
+				
+//			}
+//		});
+//		asynchronousNotifier.setDaemon(true);
+//		asynchronousNotifier.setName("shares changed worker");
+//		asynchronousNotifier.start();
 	}
 	
 	/**
@@ -515,9 +530,7 @@ public class IndexNodeCommunicator implements TableModel {
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex) {
 		IndexNode node;
-		synchronized (nodes) {
-			node = nodes.get(rowIndex);
-		}
+		node = nodes.get(rowIndex);
 		if (columnIndex==NAME_IDX) {
 			return node.getName();
 		} else if (columnIndex==STATUS_IDX) {
@@ -536,9 +549,7 @@ public class IndexNodeCommunicator implements TableModel {
 	 * @return
 	 */
 	public IndexNode getNodeForRow(int rowIdx) {
-		synchronized (nodes) {
-			return nodes.get(rowIdx);
-		}
+		return nodes.get(rowIdx);
 	}
 	
 	/**
@@ -547,9 +558,7 @@ public class IndexNodeCommunicator implements TableModel {
 	 * @return
 	 */
 	public int getRowForNode(IndexNode node) {
-		synchronized(nodes) {
-			return nodes.indexOf(node);
-		}
+		return nodes.indexOf(node);
 	}
 	
 	@Override

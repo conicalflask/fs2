@@ -102,7 +102,7 @@ public class AdvancedSettings extends SettingsPanel {
 		
 		if (iim.isCurrentlyActive()) {
 			status = "active";
-		} else if (iim.isAutoIndexNodeInhibited()) {
+		} else if (iim.isAutoIndexNodeInhibitedAWTSAFE()) {
 			status = "inhibited";
 		} else if (iim.isAutoIndexnodeEnabled()) {
 			status = "inactive";
