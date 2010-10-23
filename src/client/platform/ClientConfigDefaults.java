@@ -74,7 +74,7 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		
 		//Internal indexnode:
 		public static final String INTERNAL_INDEXNODE_ROOTKEY = "internal_indexnode/";
-		public static final String AUTOMATIC_INDEXNODE = "internal_indexnode/autorun";
+		public static final String AUTOMATIC_INDEXNODE = "internal_indexnode/autorun_2";
 		public static final String INTERNAL_INDEXNODE_ALWAYS_ON = "internal_indexnode/alwayson"; 
 	}
 	
@@ -110,7 +110,7 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		defaults.put(CK.AUTO_INDEX_NODE,"true");
 		comments.put(CK.AUTO_INDEX_NODE, "if auto_index is 'true' then this client will automatically register with autodetected indexnodes.");
 		
-		defaults.put(CK.AUTOMATIC_INDEXNODE, "true");
+		defaults.put(CK.AUTOMATIC_INDEXNODE, "false");
 		comments.put(CK.AUTOMATIC_INDEXNODE, "if true then this client will automatically run an indexnode when needed");
 		
 		defaults.put(CK.INTERNAL_INDEXNODE_ALWAYS_ON, "false");

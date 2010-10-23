@@ -74,6 +74,7 @@ public class AdvancedSettings extends SettingsPanel {
 		ret.add(autoindexInfo, BorderLayout.NORTH);
 		
 		final JCheckBox autoindex = new JCheckBox("become an indexnode if needed", iim.isAutoIndexnodeEnabled());
+		autoindex.setEnabled(false);
 		autoindex.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
