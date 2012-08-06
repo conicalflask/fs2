@@ -1,0 +1,23 @@
+FS2 Reference Client README
+=======================================
+
+Contents:
+1) Command line switches
+2) Memory consumption
+
+---------------------------------------
+
+1) Command line switches: These are switches to the JVM so specify them before the jar, for example: 'java -Dheadless -jar client.jar'
+
+-Dheadless          Indicates FS2 should not start a GUI. Normally FS2 would quit if it tries to run with a GUI and the gui fails to start.
+                    You may always send a SIGUSR1 to FS2 to cause it to refresh its shares. This is very useful in headless mode!
+-Dplatform={path}   Forces FS2 to use the {path} given to store the configuration file and code updates. This must be read-write!
+-Dupdate={url}      Recommends FS2 to update itself from the given HTTP repository URL (without confirmation), after updating it will launch the new version. This is primarily for convinience of console-mode users.
+                    You may leave {url} empty to just try the default/configured HTTP sources.
+                    This update is triggered before the FS2 communication subsystem is started so will not attempt to update from the indexnode.
+
+2) Memory consumption:
+
+This implementation of the FS2 client generates (and maintains) file lists in memory for your shared directories. This means that you are likely to run out of Java heap space if you share large directories. (or lots of medium sized directories)
+Use the following switch to allow Java to use more memory:
+-Xmx{size}         For example: -Xmx1024m will allow java to use 1GiB of ram! A typical indexnode will use at least 4GiB of ram, for perspective.
