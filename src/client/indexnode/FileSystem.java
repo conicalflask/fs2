@@ -189,7 +189,7 @@ public class FileSystem implements TreeModel, TableModel {
 			subtrees.add(searches);
 		}
 		
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Enumeration children() {
 			//Copy the array whilst synchronized, stupid enumerations :@

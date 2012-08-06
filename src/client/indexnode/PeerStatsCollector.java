@@ -62,9 +62,12 @@ public class PeerStatsCollector implements Serializable, TableModel, Savable {
 		private long upBytes;
 		private long downBytes;
 		//the number of files: (up: us->them, down: them->us)
+		@SuppressWarnings("unused")
 		private long upFiles;
+		@SuppressWarnings("unused")
 		private long downFiles;
 		//total time (in millis) spent on each of the up and down transfers to this peer:
+		@SuppressWarnings("unused")
 		private long upTime;
 		private long downTime;
 		//records if we arbitrarily like this peers

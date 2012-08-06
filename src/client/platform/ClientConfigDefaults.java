@@ -101,7 +101,7 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		defaults.put(CK.UPLOAD_BYTES_PER_SEC, Long.toString(1024l*1024l*1024l*1024l));
 		defaults.put(CK.DOWNLOAD_BYTES_PER_SEC, Long.toString(1024l*1024l*1024l*1024l));
 		defaults.put(CK.ACTIVE_UPLOADS, "10");
-		defaults.put(CK.ACTIVE_UPLOADS_PER_USER, "10");
+		defaults.put(CK.ACTIVE_UPLOADS_PER_USER, "2");
 		comments.put(CK.ACTIVE_UPLOADS_PER_USER, "indicates how many upload slots a single remote client can use on their own.");
 		defaults.put(CK.ACTIVE_DOWNLOADS, "4");
 		defaults.put(CK.ACTIVE_DOWNLOADS_PER_FILE, "1");

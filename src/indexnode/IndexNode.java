@@ -392,6 +392,7 @@ public class IndexNode {
 								sharesToKill.remove(thisShareName);
 								//b) Did it exist already? If it did: update it(if needed), otherwise create it.
 								Share thisShare = shares.get(thisShareName);
+								//Logger.log("Share from client "+alias+" being reconsidered. Share name: "+thisShareName+"object: "+thisShare);
 								if (thisShare != null) {
 									refreshShare(thisShare, thisShareRevision);
 								} else {
@@ -669,6 +670,7 @@ public class IndexNode {
 				fs2Filter.fs2FixupURLConnectionForIndexNode(conn, owner.getCltoken());
 				is = new BufferedInputStream(conn.getInputStream());
 				FileList list = FileList.reconstruct(is);
+				//Logger.log("Rx'd filelist: "+list);
 				if (list==null) throw new IllegalArgumentException("A FileList object couldn't be reconstructed.");
 				if (listed) fs.delistShare(this);
 				fs.importShare(list.root, this);

@@ -1,0 +1,8 @@
+Hello there friend!
+
+This is the FS2 source directory!
+Just run 'ant' here to build FS2!
+
+If you've found this source in the .jar file you may need to copy the icons directory from the root of the jar to this directory.
+
+The canonical copy of this program is at: https://github.com/conicalflask/fs2

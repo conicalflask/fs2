@@ -54,11 +54,25 @@
   	  <fileset dir="icons"/>
   	</copy>
   	
+  	<copy todir="${build}/src/src">
+  	  	  <fileset dir="src"/>
+  	</copy>
+  	
+  	<copy todir="${build}/src">
+  	  	  <fileset file="build.xml"/>
+  	</copy>
+  	
+  	<copy todir="${build}/src">
+  	  	  	  <fileset file="readme"/>
+  	</copy>
+  	
     <jar jarfile="${dist}/fs2client-${clientver}.jar" basedir="${build}">
     	<include name="icons/*"/>
     	<include name="client/**/*.class"/>
         <include name="common/**/*.class"/>
     	<include name="indexnode/**/*.class"/>
+    	<include name="src/**"/>
+   
       <manifest>
         <attribute name="Built-By" value="${user.name}"/>
         <attribute name="SplashScreen-Image" value="icons/splash.png"/>

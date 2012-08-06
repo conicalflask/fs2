@@ -60,10 +60,10 @@ public class CriticalFailureHandler implements UncaughtExceptionHandler {
 		}
 		if (failureMessage.equals("")) failureMessage = "FS2 cannot start/continue due to a critical fault: "+t;
 		Logger.severe(failureMessage);
-		Notifications.notifyCriticalFailure(failureMessage+"\n\nGary Plumbridge (EMiP) would probably like to hear about this!\nIf this was unexpected please consider enabling logging to disk, and email gary@phodex.net with the log file.\n\nCaused at: "+t.getStackTrace()[0], t.getClass().getSimpleName());
+		Notifications.notifyCriticalFailure(failureMessage+"\n\nGary Plumbridge (ConicalFlask) would probably like to hear about this!\nIf this was unexpected please consider enabling logging to disk, and email gary@plumbridge.net with the log file.\n\nCaused at: "+t.getStackTrace()[0], t.getClass().getSimpleName());
 		if (Logger.getLogFile()!=null) Logger.log("A copy of much of this log is stored in: "+Logger.getLogFile().getAbsolutePath());
 		if (printStackTrace) t.printStackTrace();
-		System.err.println("\nExiting disgracefully... Please contact gary@phodex.net with the stack trace if the reason is not obvious.");
+		System.err.println("\nExiting disgracefully... Please contact gary@plumbridge.net with the stack trace if the reason is not obvious.");
 		Runtime.getRuntime().halt(1);
 	}
 }

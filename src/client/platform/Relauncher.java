@@ -56,6 +56,7 @@ public class Relauncher {
 		URLClassLoader loader = new URLClassLoader(new URL[] { newJar }, null);
 		try {
 			//                    __/-This is used so that automatic refactoring might work in future if the entry point is changed.
+			@SuppressWarnings("rawtypes")
 			Class ce = loader.loadClass(ClientExecutor.class.getName());
 			Method init = ce.getDeclaredMethod("main", String[].class);
 			//Shutdown the current instance:
@@ -74,7 +75,7 @@ public class Relauncher {
 	}
 	
 	/**
-	 * Attemps to relaunch the JVM and FS2 with the new heap-size in bytes specified.
+	 * Attempts to relaunch the JVM and FS2 with the new heap-size in bytes specified.
 	 * 
 	 * the returns of this method are subtle:
 	 * 

@@ -312,6 +312,8 @@ public class NativeFS implements Filesystem {
 
 	@Override
 	public void delistShare(Share share) {
+		//Logger.log("Delisting share: "+share.getName());
+		
 		FilesystemEntry clientRoot = share.getOwner().getFilesystemRoot();
 		FilesystemEntry shareRoot = clientRoot.getNamedChild(share.getName());
 		//Decrease the client's total sharesize:
@@ -375,6 +377,7 @@ public class NativeFS implements Filesystem {
 
 	@Override
 	public void importShare(Item root, Share share) {
+		//Logger.log("Adding to filesystem:"+root.name);
 		FilesystemEntry shareRoot = share.getOwner().getFilesystemRoot().createChildDirectory(share.getName(), share);
 		importFileListIntoFilesystem(root, shareRoot, share);
 		share.getOwner().getFilesystemRoot().adjustLinkCount(1);

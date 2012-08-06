@@ -416,9 +416,9 @@ public class IndexNodeCommunicator implements TableModel {
 	 * Returns immediately.
 	 */
 	public void sharesChanged() {
-//		Thread asynchronousNotifier = new Thread(new Runnable() {
-//			@Override
-//			public void run() {
+		Thread asynchronousNotifier = new Thread(new Runnable() {
+			@Override
+			public void run() {
 		
 				//1) build a new filelist.xml
 				buildShareListXML();
@@ -432,11 +432,11 @@ public class IndexNodeCommunicator implements TableModel {
 				}
 				
 				
-//			}
-//		});
-//		asynchronousNotifier.setDaemon(true);
-//		asynchronousNotifier.setName("shares changed worker");
-//		asynchronousNotifier.start();
+			}
+		});
+		asynchronousNotifier.setDaemon(true);
+		asynchronousNotifier.setName("shares changed worker");
+		asynchronousNotifier.start();
 	}
 	
 	/**
