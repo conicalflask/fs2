@@ -45,3 +45,4 @@ If you find bugs, find something confusing or would like a realistic new feature
 The code does not require any external libraries and will work as an eclipse project with no special configuration. To build jar files, run 'ant' in the directory with the build.xml file.
 
 We're definitely looking for documentation and would be open to fresh contributors. If you've fixed bugs or have implemented new features, we'll happily consider pull requests.
+
