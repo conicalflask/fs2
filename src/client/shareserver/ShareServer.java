@@ -649,13 +649,14 @@ public class ShareServer implements TableModel {
 	}
 	
 	ArrayList<TableModelListener> modelListeners = new ArrayList<TableModelListener>();
-	private Class<?>[] columnClasses = {String.class, String.class, FileSize.class, FileSize.class, String.class}; //Name, status , size, time to next refresh
-	private String[] columnNames = {"Name", "Status", "Size", "Files", "Next refresh"};
+	private Class<?>[] columnClasses = {String.class, String.class, FileSize.class, FileSize.class, String.class, String.class}; //Name, status , size, time to next refresh
+	private String[] columnNames = {"Name", "Status", "Size", "Files", "Next refresh", "Path"};
 	private static final int NAME_IDX=0;
 	private static final int STATUS_IDX=1;
 	private static final int SIZE_IDX=2;
 	private static final int FILE_IDX=3;
 	private static final int NEXT_REFRESH_IDX=4;
+	private static final int PATH_IDX=5;
 
 	@Override
 	public void addTableModelListener(TableModelListener l) {
@@ -700,6 +701,8 @@ public class ShareServer implements TableModel {
 		case NEXT_REFRESH_IDX:
 			long ttnr = getTimeToNextRefreshShare(share);
 			return (ttnr<=0 ? "pending" : Util.describeInterval(ttnr));
+		case PATH_IDX:
+			return share.getPath().getAbsolutePath();
 		}
 		return null;
 	}

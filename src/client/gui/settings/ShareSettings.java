@@ -2,12 +2,14 @@ package client.gui.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.FlowLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.ImageObserver;
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 
 import javax.swing.ImageIcon;
@@ -18,6 +20,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -35,12 +39,13 @@ import client.shareserver.Share;
 import client.shareserver.Share.Status;
 
 @SuppressWarnings("serial")
-public class ShareSettings extends SettingsPanel {
+public class ShareSettings extends SettingsPanel implements ListSelectionListener {
 	
 	private JTable shares;
 	private JButton addShare;
 	private JButton removeShares;
 	private JButton refreshShares;
+	private JButton openShares;
 	
 	private class SharesLoadingAnimationHelper implements ImageObserver, TableModelListener {
 
@@ -120,13 +125,21 @@ public class ShareSettings extends SettingsPanel {
 		shares = new FancierTable(frame.getGui().getShareServer(), frame.getGui().getConf(), CK.SHARES_TABLE_COLWIDTHS);
 		registerHint(shares, new StatusHint(frame.getGui().getUtil().getImage("shares"), "These directories are shared with other peers"));
 		
+		shares.getSelectionModel().addListSelectionListener(this);
+		
 		shares.getColumn(frame.getGui().getShareServer().getColumnName(0)).setCellRenderer(new ShareNameCellRenderer());
 		
 		add(new JLabel("Your shared folders: ", frame.getGui().getUtil().getImage("shares"), JLabel.LEFT), BorderLayout.NORTH);
 		add(new JScrollPane(shares), BorderLayout.CENTER);
 		
-		JPanel bp = new JPanel(new FlowLayout());
-		add(bp, BorderLayout.SOUTH);
+		JPanel topbp = new JPanel(new FlowLayout());
+		JPanel bottombp = new JPanel(new FlowLayout());
+		
+		JPanel buttonsPanel = new JPanel(new BorderLayout());
+		buttonsPanel.add(topbp, BorderLayout.NORTH);
+		buttonsPanel.add(bottombp, BorderLayout.CENTER);
+		
+		add(buttonsPanel, BorderLayout.SOUTH);
 		addShare = new JButton("Add share...", frame.getGui().getUtil().getImage("add"));
 		registerHint(addShare, new StatusHint(frame.getGui().getUtil().getImage("add"), "Shares a new folder with FS2"));
 		addShare.addActionListener(new ActionListener() {
@@ -135,7 +148,7 @@ public class ShareSettings extends SettingsPanel {
 				addShare(frame, e);	
 			}
 		});
-		bp.add(addShare);
+		topbp.add(addShare);
 		
 		removeShares = new JButton("Remove selected shares", frame.getGui().getUtil().getImage("delete"));
 		registerHint(removeShares, new StatusHint(frame.getGui().getUtil().getImage("delete"), "Stops sharing the selected folders"));
@@ -145,7 +158,7 @@ public class ShareSettings extends SettingsPanel {
 				removeShares(frame);
 			}
 		});
-		bp.add(removeShares);
+		topbp.add(removeShares);
 		
 		refreshShares = new JButton("Refresh selected shares", frame.getGui().getUtil().getImage("refresh"));
 		registerHint(refreshShares, new StatusHint(frame.getGui().getUtil().getImage("refresh"), "Makes changes in the selected folders available to other peers immediately"));
@@ -155,7 +168,19 @@ public class ShareSettings extends SettingsPanel {
 				refreshShares(frame);
 			}
 		});
-		bp.add(refreshShares);
+		topbp.add(refreshShares);
+		
+		openShares = new JButton("Open share", frame.getGui().getUtil().getImage("type-dir"));
+		openShares.setEnabled(false);
+		registerHint(openShares, new StatusHint(frame.getGui().getUtil().getImage("type-dir"), "Opens this shared folder to browse"));
+		openShares.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				openShares(frame);
+			}
+		});
+		bottombp.add(openShares);
+		
 		
 	}
 
@@ -225,7 +250,35 @@ public class ShareSettings extends SettingsPanel {
 		for (Share s : ref) s.refresh();
 	}
 	
-	
+	private void openShares(final MainFrame frame) {
+		int[] toopen = shares.getSelectedRows();
+		LinkedList<Share> ref = new LinkedList<Share>();
+		for (int i : toopen) {
+			ref.add(frame.getGui().getShareServer().getShares().get(shares.convertRowIndexToModel(i)));
+		}
+		for (Share s : ref)
+			try {
+				Desktop.getDesktop().open(s.getPath());
+			} catch (IOException e) {
+				Logger.warn("Couldn't open a file browser for some reason: "+e);
+				e.printStackTrace();
+			}
+	}
+
+	@Override
+	public void valueChanged(ListSelectionEvent lse) {
+		int[] selected = shares.getSelectedRows();
+		if (selected==null || selected.length==0) {
+			openShares.setText("Open share");
+			openShares.setEnabled(false);
+		} else if (selected.length>1) {
+			openShares.setText("Open "+selected.length+" shares");
+			openShares.setEnabled(true);
+		} else {
+			openShares.setText("Open "+frame.getGui().getShareServer().getShares().get(shares.convertRowIndexToModel(shares.getSelectedRow())).getPath().getAbsolutePath());
+			openShares.setEnabled(true);
+		}
+	}
 	
 
 }

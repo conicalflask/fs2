@@ -644,6 +644,9 @@ public class DownloadQueue implements Serializable, TreeModel, Savable, NewPeerL
 		public void downloadComplete() {
 			parent.removeChild(this, true);
 			DownloadInfo info = active;
+			
+			fireDownloadCompleteEvent(this);
+			
 			if (info!=null) {
 				dc.allDownload.expandTask(-info.bytesRemaining());
 			} else {
@@ -1296,6 +1299,8 @@ public class DownloadQueue implements Serializable, TreeModel, Savable, NewPeerL
 		queueItemUpdater = new QueueItemUpdater();
 		noSourceDispatches = Collections.synchronizedCollection(new HashSet<Integer>());
 		iterationIdx = 1; //indicates that all items in the tree have not yet been considered this cycle.
+		
+		dcls = new ArrayList<DownloadCompleteListener>();
 	}
 
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException {
@@ -1496,6 +1501,23 @@ public class DownloadQueue implements Serializable, TreeModel, Savable, NewPeerL
 	@Override
 	public void valueForPathChanged(TreePath path, Object newValue) {
 		//do nothing. The tree is not user-editable.
+	}
+	
+	//Download completion listener things:
+	private transient ArrayList<DownloadCompleteListener> dcls = new ArrayList<DownloadCompleteListener>();
+	
+	/**
+	 * Registers a new listener for file-completion events.
+	 * The events will not be triggered in a swing thread!
+	 * 
+	 * @param dcl
+	 */
+	public void addDownloadCompleteListener(DownloadCompleteListener dcl) {
+		dcls.add(dcl);
+	}
+	
+	private void fireDownloadCompleteEvent(DownloadFile file) {
+		for (DownloadCompleteListener dcl : dcls) dcl.downloadComplete(file);
 	}
 
 	

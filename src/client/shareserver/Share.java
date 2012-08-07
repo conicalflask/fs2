@@ -193,7 +193,7 @@ public class Share {
 	Status status = Status.BUILDING;
 	ErrorCause cause = ErrorCause.OTHER;
 	String causeOtherDescription;
-	File location;
+	private File location;
 	File canonicalLocation;
 	FileList list; //The structure that holds the list of files.
 	File listFile;
@@ -419,6 +419,14 @@ public class Share {
 	 */
 	public long getLastRefreshed() {
 		return list.getLastRefreshed();
+	}
+
+	/**
+	 * Returns the path that this shares.
+	 * @return
+	 */
+	public File getPath() {
+		return location;
 	}
 	
 }

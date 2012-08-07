@@ -31,10 +31,13 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
+import common.FS2Constants;
 import common.Logger;
 import common.Util;
+import common.Util.Deferrable;
 
 import client.gui.MainFrame.StatusHint;
+import client.indexnode.downloadcontroller.DownloadCompleteListener;
 import client.indexnode.downloadcontroller.DownloadController;
 import client.indexnode.downloadcontroller.DownloadQueue;
 import client.indexnode.downloadcontroller.DownloadQueue.DownloadDirectory;
@@ -43,7 +46,7 @@ import client.indexnode.downloadcontroller.DownloadQueue.DownloadItem;
 import client.platform.ClientConfigDefaults.CK;
 
 @SuppressWarnings("serial")
-public class DownloadsTab extends TabItem implements TreeExpansionListener, ActionListener, TreeModelListener, PropertyChangeListener, ListSelectionListener {
+public class DownloadsTab extends TabItem implements TreeExpansionListener, ActionListener, TreeModelListener, PropertyChangeListener, ListSelectionListener, DownloadCompleteListener {
 
 	DownloadQueue q;
 	DownloadController dc;
@@ -55,6 +58,8 @@ public class DownloadsTab extends TabItem implements TreeExpansionListener, Acti
 		
 		q = frame.gui.dc.getQueue();
 		dc = frame.gui.dc;
+		
+		q.addDownloadCompleteListener(this);
 		
 		this.setLayout(new BorderLayout());
 		this.add(getSplitSection(), BorderLayout.CENTER);
@@ -107,13 +112,48 @@ public class DownloadsTab extends TabItem implements TreeExpansionListener, Acti
 	
 	JTree queue;
 	JButton removeAll;
+	JButton openldDir;
+	JButton openldFile;
 	
 	private JPanel getButtons() {
 		JPanel ret = new JPanel(new FlowLayout());
 		
 		removeAll = new JButton("Clear queue", frame.gui.util.getImage("delete"));
 		removeAll.addActionListener(this);
+		
 		ret.add(removeAll);
+		
+		openldDir = new JButton("Open folder", frame.gui.util.getImage("type-dir"));
+		openldDir.setEnabled(false);
+		openldDir.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				try {
+					Desktop.getDesktop().open(displayedFile.getFile().getParentFile());
+				} catch (IOException e) {
+					Logger.log("Couldn't open file browser: "+e);
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		ret.add(openldDir);
+		
+		openldFile = new JButton("Open file", frame.gui.util.getImage("type-unknown"));
+		openldFile.setEnabled(false);
+		openldFile.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				try {
+					Desktop.getDesktop().open(displayedFile.getFile());
+				} catch (IOException e) {
+					Logger.log("Couldn't open file browser: "+e);
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		ret.add(openldFile);
 		
 		return ret;
 	}
@@ -350,5 +390,41 @@ public class DownloadsTab extends TabItem implements TreeExpansionListener, Acti
 			DownloadFile f = dc.getFileForRow(chunksTable.convertRowIndexToModel(rowidx));
 			queue.setSelectionPath(f.getPath());
 		}
+	}
+
+	/** The file most recently downloaded */
+	private DownloadFile mostRecentlyFinished;
+	
+	//The gui updating is throttled to prevent extreme cpu usage when downloading a load of files.
+	// We cache the last filename displayed so if a user clicks during a fast update the correct file is opened.
+	private DownloadFile displayedFile;
+	private DownloadCompleteGuiUpdater dcgu = new DownloadCompleteGuiUpdater();
+	private class DownloadCompleteGuiUpdater implements Deferrable {
+
+		@Override
+		public void run() {
+			Utilities.edispatch(new Runnable() {
+				@Override
+				public void run() {
+					displayedFile = mostRecentlyFinished;
+					openldDir.setText("Open "+displayedFile.getFile().getParent());
+					openldDir.setEnabled(true);
+					openldFile.setText("Open "+displayedFile.getFile().getName());
+					openldFile.setIcon(frame.gui.util.getIconForType(frame.gui.util.guessType(displayedFile.getFile().getName())));
+					openldFile.setEnabled(true);
+				}
+			});
+		}
+		
+	}
+	
+	
+	/**
+	 * Called when a download has finished successfully. It is not called in a swing thread. This is to allow us to keep track of the most recently downloaded file.
+	 */
+	@Override
+	public void downloadComplete(DownloadFile file) {
+		mostRecentlyFinished = file;
+		Util.scheduleExecuteNeverFasterThan(FS2Constants.CLIENT_EVENT_MIN_INTERVAL, dcgu);
 	}
 }

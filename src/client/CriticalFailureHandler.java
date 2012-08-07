@@ -51,7 +51,7 @@ public class CriticalFailureHandler implements UncaughtExceptionHandler {
 				failureMessage = "FS2 has run out of memory! Your java was allowed "+Util.niceSize(maxMemory)+" but it is\nrecomended to have at least 256MiB if you're sharing lots or queueing lots of downloads.\n\nYou can allocate more memory to Java in the advanced settings.";
 			} else {
 				//If here then they already have a pretty good heap size, so maybe a memory leak or really large shares?
-				failureMessage = "FS2 has run our of memory! You have a good sized maximum heap already ("+Util.niceSize(maxMemory)+") so...\n1) You're sharing too many files, so increase the memory limit some more.\n2) Your download queue is too big, increase your heap and try again. \n3) There's a memory leak I don't know about.";
+				failureMessage = "FS2 has run out of memory! You have a good sized maximum heap already ("+Util.niceSize(maxMemory)+") so...\n1) You're sharing too many files, so increase the memory limit some more.\n2) Your download queue is too big, increase your heap and try again. \n3) There's a memory leak I don't know about.";
 			}
 		}
 		if (t instanceof HeadlessException) {

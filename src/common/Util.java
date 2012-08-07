@@ -357,7 +357,7 @@ public abstract class Util {
 	
 	
 	/**
-	 * Used to represent tasks that can be deffered but does not imply they will be executed in another thread.
+	 * Used to represent tasks that can be deferred but does not imply they will be executed in another thread.
 	 * @author gary
 	 */
 	public interface Deferrable {
