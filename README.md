@@ -17,7 +17,7 @@ Getting Started
 
 FS2 requires Java 1.6 or above and will run on Windows, Linux and OS X. Just double click on the fs2client-X.X.X.jar, or run "java -jar fs2client-X.X.X.jar"
 
-The latest build can always be found at ftp://empty.org.uk/fs2/ and the fs2 client will automatically update to the latest version available. If autoupdates are not your thing, then you can disable them in the advanced settings.
+**The latest build can always be found at ftp://empty.org.uk/fs2/ and the fs2 client will automatically update to the latest version available.** If autoupdates are not your thing, then you can disable them in the advanced settings.
 
 If there is already an indexnode active on your network then that's it! You're good to go! Your client will automatically join indexnodes on your LAN.
 Just go to the files tab to see what other people are sharing. To share files yourself, click 'Shares' in the 'Configure' menu and add directories to be shared.
@@ -35,7 +35,7 @@ For a typical small LAN party of 50 or so people, with 40TiB shared over a few m
 If you have a very small lan party of <10 people or so, an ordinary peer can easily be the indexnode.
 Because indexnodes require so much memory they will benefit from 64bit Java on a 64bit operating system.
 
-The easy way to run an indexnode is to go to the advanced settings and check the "always run an indexnode" box. Make sure you've set the maximum heap size to be big enough!
+**The easy way to run an indexnode is to go to the advanced settings and check the "always run an indexnode" box. Make sure you've set the maximum heap size to be big enough!**
 
 
 Help and Collaboration
