@@ -482,6 +482,8 @@ public class ShareServer implements TableModel {
 		synchronized (shares) {
 			for (Share s : shares) {
 				s.shutdown();
+				//Null large file list just in case. (if this was an OOM shutdown)
+				s.list = null;
 			}
 		}
 		//) shutdown the communicator.
