@@ -7,14 +7,7 @@ import common.Util;
 
 /**
  * A simple executable class to print the reference client version.
- * 
- * TODO for the next big version of FS2:
- * Make the logger intercept all console stuff for logging to disk.
- * Add an 'up' button in the file browser.
- * Add more things on the download screen
- * Add an access/security log (apache style probably.)
- * Make logging to disk default.
- * 
+ *
  * @author gary
  *
  */

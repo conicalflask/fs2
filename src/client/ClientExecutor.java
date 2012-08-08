@@ -117,11 +117,9 @@ public class ClientExecutor {
 			
 		} catch (Throwable t) {
 			try {
-				try {
-					ssvr.shutdown();
-				} catch (Exception e) {
-					//Dont care at this stage.
-				}
+				ssvr.shutdown();
+			} catch (Exception e) {
+				// Dont care
 			} finally {
 				CriticalFailureHandler.criticalException(t);
 			}
