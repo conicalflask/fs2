@@ -7,7 +7,7 @@ FS2 uses centralised indexing to provide very fast browsing and searching. Usual
 Data transfer is peer to peer and automatically load balanced between available sources.
 
 FS2 is not designed to be secure or facilitate internet piracy.
-It is to allow the easy transfer of files (such steam backups) at lan parties where Windows file sharing and other programs like DC++ simply don't do searching and browsing well enough. 
+It is to allow the easy transfer of files (such as steam backups) at LAN parties where Windows file sharing and other programs like DC++ simply don't do searching and browsing well enough.
 
 The goal for FS2 is to be as easy as possible -zero configuration in most cases- and to be the best possible program for LAN party file sharing.
 Indeed, FS2 was developed for the FragSoc (University of York LAN gaming society) and has been used for nearly three years now, transferring hundreds of terrabytes in that time.
@@ -22,17 +22,17 @@ FS2 requires Java 1.6 or above and will run on Windows, Linux and OS X. Just dou
 If there is already an indexnode active on your network then that's it! You're good to go! Your client will automatically join indexnodes on your LAN.
 Just go to the files tab to see what other people are sharing. To share files yourself, click 'Shares' in the 'Configure' menu and add directories to be shared.
 
-FS2 will quickly run out of ram if you share a lot of files or queue a lot for download (>100k files). Go to advanced settings and set your allowed heap size to at least 256MiB for decent performance.
+FS2 will quickly run out of RAM if you share a lot of files or queue a lot for download (>100k files). Go to advanced settings and set your allowed heap size to at least 256MiB for decent performance.
 Running out of memory is the primary cause of problems with FS2.
 
 
-Running an indexnode
+Running an Indexnode
 ==================== 
 
 To use FS2 your network will need an indexnode. You can have more than one but it is not recommended.
 As your indexnode is responsible for indexing all the files on your network and managing all the clients, you should use a powerful computer.
 For a typical small LAN party of 50 or so people, with 40TiB shared over a few million files your indexnode will use at least 4GiB of ram and quite a lot of processing power.
-If you have a very small lan party of <10 people or so, an ordinary peer can easily be the indexnode.
+If you have a very small LAN party of <10 people or so, an ordinary peer can easily be the indexnode.
 Because indexnodes require so much memory they will benefit from 64bit Java on a 64bit operating system.
 
 **The easy way to run an indexnode is to go to the advanced settings and check the "always run an indexnode" box. Make sure you've set the maximum heap size to be big enough!**
