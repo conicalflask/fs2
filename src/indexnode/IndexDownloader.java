@@ -44,7 +44,7 @@ public class IndexDownloader implements HttpHandler {
 			int pickedIndex = gen.nextInt(hashMatches.size());
 			for (FilesystemEntry pickedEntry : hashMatches) {
 				if (pickedIndex-- == 0) {
-					System.out.println(exchange.getRequestHeaders().getFirst("fs2-alias")+" requested: "+pickedEntry.getName());
+					Logger.log(exchange.getRequestHeaders().getFirst("fs2-alias")+" requested: "+pickedEntry.getName());
 					HttpUtil.redirectToURL(exchange, new URL(pickedEntry.getURL()));
 					fs.incrementSent(pickedEntry.getSize());
 					break;

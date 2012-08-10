@@ -39,10 +39,10 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		public static final String DEFAULT_SHARE_NAME = "shares/default/name";
 		public static final String DEFAULT_SHARE_PATH = "shares/default/path";
 		public static final String SHARE_AUTOREFRESH_INTERVAL = "share_autorefresh_interval";
-		public static final String UPDATE_POLICY = "update_policy_v2";
+		public static final String UPDATE_POLICY = "update_policy_2";
 		public static final String HTTP_UPDATE_SOURCES = "http_update_sources";
 		public static final String DEFAULT_HTTP_UPDATE1 = "http_update_sources/empty";
-		public static final String LOG_MESSAGES_TO_DISK = "save_messages";
+		public static final String LOG_MESSAGES_TO_DISK = "save_messages_2";
 		public static final String AUTO_HEAP_KNOWLEDGE = "auto_heap_grow_acknowledged";
 		public static final String DISPLAY_CHAT_NOTIFICATIONS = "display_notifications";
 		public static final String AVATAR_PATH = "avatar_path";
@@ -137,7 +137,7 @@ public class ClientConfigDefaults implements ConfigDefaults {
 		
 		defaults.put(CK.DEFAULT_HTTP_UPDATE1, "http://www.empty.org.uk/fs2-autoupdate/");
 		
-		defaults.put(CK.LOG_MESSAGES_TO_DISK, Boolean.FALSE.toString());
+		defaults.put(CK.LOG_MESSAGES_TO_DISK, Boolean.TRUE.toString());
 		comments.put(CK.LOG_MESSAGES_TO_DISK, "Setting "+CK.LOG_MESSAGES_TO_DISK+" to true will save all console output into a log file. You can use this to help the FS2 developers if FS2 breaks unexpectedly.");
 		
 		defaults.put(CK.MAIN_WINDOW_TOP, "100");

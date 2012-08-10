@@ -191,7 +191,7 @@ public class HttpUtil {
 			    		}
 			    		
 			    	} catch (Exception e) {
-			    		System.out.println("Couldn't service range request: "+requestRange+" - "+e.toString());
+			    		Logger.log("Couldn't service range request: "+requestRange+" - "+e.toString());
 			    	}
 			    }
 			}

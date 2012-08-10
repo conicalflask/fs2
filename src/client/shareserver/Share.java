@@ -76,7 +76,7 @@ public class Share {
 			
 			File[] dirChildren = directory.listFiles();
 			if (dirChildren!=null) {
-				for (File f : dirChildren) {
+				for (final File f : dirChildren) {
 					//Here is the 'main' loop, items place here will happen before each file is considered.
 					if (shouldStop) return;
 					Util.executeNeverFasterThan(FS2Constants.CLIENT_EVENT_MIN_INTERVAL, notifyShareServer);
@@ -139,7 +139,7 @@ public class Share {
 			}
 		}
 		
-		boolean updateItem(File f, Item i) {
+		boolean updateItem(final File f, Item i) {
 			if (f.isDirectory()) {
 				if (i.children==null) i.children = new HashMap<String, Item>();
 				refreshDirectory(f, i);

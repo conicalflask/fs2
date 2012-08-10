@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import common.Util.Deferrable;
 
 /**
- * A general pupose file-operation (or any operation who's progress and completion can be measured by a single number) progress tracker.
- * It can be used to calculate transer speeds, monitor progress of a file copy etc.
+ * A general purpose file-operation (or any operation who's progress and completion can be measured by a single number) progress tracker.
+ * It can be used to calculate transfer speeds, monitor progress of a file copy etc.
  * 
  * the defaults (sample lifetime and sample-clumping interval) are only sensible for file transfers order of 1000mbits/sec.
  * For slower transfers (such as people filling a hall) reduce the parameters accordingly.
@@ -15,7 +15,7 @@ import common.Util.Deferrable;
  * Samples are clumped together and recorded only every 100ms by default at most.
  * Samples are only kept for 10 seconds at most, implying a maximum of 100 samples.
  * 
- * Trackers may also be formed into a heirachy with progress propagated to a tracker's parent.
+ * Trackers may also be formed into a hierarchy with progress propagated to a tracker's parent.
  * 
  * @author gary
  */
@@ -149,12 +149,12 @@ public class ProgressTracker {
 	}
 	
 	/**
-	 * Returns a running average number of units of progress occuring per second.
+	 * Returns a running average number of units of progress occurring per second.
 	 * 
-	 * @return the number of units per second currently occuring.
+	 * @return the number of units per second currently occurring.
 	 */
 	public synchronized double getSpeed() {
-		addSample(0); //record that no units were added now, so that if this is polled when no progress is occuring it will decrease over time.
+		addSample(0); //record that no units were added now, so that if this is polled when no progress is occurring it will decrease over time.
 		
 		long dur = getDuration();
 		if (dur==0l) {

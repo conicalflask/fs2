@@ -88,9 +88,9 @@ public abstract class Util {
 	}
 	
 	/**
-	 * Join the string representation of objects together with a delimeter between them.
+	 * Join the string representation of objects together with a delimiter between them.
 	 * @param items The array of objects to join.
-	 * @param delim The seperator/delimeter.
+	 * @param delim The separator/delimiter.
 	 * @return
 	 */
 	public static String join(Object[] items, String delim) {
@@ -102,7 +102,7 @@ public abstract class Util {
 	}
 	
 	/**
-	 * Given a simple quoted string removes the quotes from the beginning and end, and unescapes the contents according to standard convensions:
+	 * Given a simple quoted string removes the quotes from the beginning and end, and unescapes the contents according to standard conventions:
 	 * Examples:<br>
 	 * "w00t\"" -> w00t"
 	 * "w0\\\"t" -> w0\"t
