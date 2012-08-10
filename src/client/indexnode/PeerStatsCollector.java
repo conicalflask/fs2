@@ -43,12 +43,12 @@ import common.Util.FileSize;
  * 
  * This class provides statistics such as transfered files and bytes but also
  * retains information about transfers between us and peers. This is used to
- * make informed decicions later about which peers to download from.
+ * make informed decisions later about which peers to download from.
  * (and because it looks cool!)
  * 
  * It's saved to disk by serialisation.
  * 
- * It also implements a table model so any GUIs can recieve (rate-limited!) events on change.
+ * It also implements a table model so any GUIs can receive (rate-limited!) events on change.
  * 
  * @author gary
  */
@@ -62,12 +62,9 @@ public class PeerStatsCollector implements Serializable, TableModel, Savable {
 		private long upBytes;
 		private long downBytes;
 		//the number of files: (up: us->them, down: them->us)
-		@SuppressWarnings("unused")
 		private long upFiles;
-		@SuppressWarnings("unused")
 		private long downFiles;
 		//total time (in millis) spent on each of the up and down transfers to this peer:
-		@SuppressWarnings("unused")
 		private long upTime;
 		private long downTime;
 		//records if we arbitrarily like this peers

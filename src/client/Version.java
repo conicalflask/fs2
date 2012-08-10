@@ -21,6 +21,7 @@ public class Version {
 	 */
 	static {
 		FS2_VERSION_DESCRIPTIONS = new HashMap<String, String>();
+		FS2_VERSION_DESCRIPTIONS.put("0.9.5", "Access logs and better logging.");
 		FS2_VERSION_DESCRIPTIONS.put("0.9.4", "Now with open buttons for downloads and shares.");
 		FS2_VERSION_DESCRIPTIONS.put("0.9.3", "Shares now refresh properly, and source is now included in the .jar file!");
 		FS2_VERSION_DESCRIPTIONS.put("0.9.2", "Disabled automatic indexnode by default until I fix it.");
@@ -48,7 +49,7 @@ public class Version {
 	/** The version identifier for the client.
 	 * This is used by the client to identify new versions 
 	 * DONT FORGET TO DESCRIBE THIS VERSION! */
-	public static final Integer[] FS2_CLIENT_VERSION_BITS = {0,9,4};
+	public static final Integer[] FS2_CLIENT_VERSION_BITS = {0,9,5};
 	
 	//Into a string:
 	public static final String FS2_CLIENT_VERSION() { return Util.join(FS2_CLIENT_VERSION_BITS,"."); }
