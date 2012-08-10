@@ -136,7 +136,7 @@ public class ClientExecutor {
 	
 	private static void setupLogging() {
 		if (Boolean.parseBoolean(conf.getString(CK.LOG_MESSAGES_TO_DISK))) {
-			Logger.setLogFileName(Platform.getLogsDirectory().getAbsolutePath()+File.separator+(new Date()).toString()+".log");
+			Logger.setLogFileName(Platform.getLogsDirectory().getAbsolutePath()+File.separator+(new Date()).toString().replace(':','-'));
 			Logger.log("Log messages are now being saved to: "+Logger.getLogFile());
 		}
 	}

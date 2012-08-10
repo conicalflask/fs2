@@ -53,7 +53,7 @@ public class IndexDownloader implements HttpHandler {
 			
 		} catch (Exception e) {
 			Logger.severe("Exception handling a download request: " +e.toString());
-			e.printStackTrace();
+			Logger.log(e);
 			//If we're here then things have gone so wrong we shouldn't bother with nice output.
 			HttpUtil.simpleResponse(exchange, "Your request couldn't be handled due to an internal exception.", 500);
 		}

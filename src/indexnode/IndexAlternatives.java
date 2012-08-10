@@ -55,7 +55,7 @@ public class IndexAlternatives implements HttpHandler {
 			if (e.getMessage().equals("Broken pipe")) Logger.warn("Ungrateful bastard client ('"+exchange.getRequestHeaders().getFirst("fs2-alias")+"') broke the pipe.");
 		} catch (Exception e) {
 			Logger.severe("Exception handling a browse request: " +e.toString());
-			e.printStackTrace();
+			Logger.log(e);
 			//If we're here then things have gone so wrong we shouldn't bother with nice output.
 			HttpUtil.simpleResponse(exchange, "Your request couldn't be handled due to an internal exception.", 500);
 		}

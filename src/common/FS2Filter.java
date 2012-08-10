@@ -104,7 +104,7 @@ public class FS2Filter extends Filter {
 		try {
 			return new URL("https://"+insecureURL.getHost()+":"+(insecureURL.getPort()+1)+insecureURL.getFile());
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			Logger.log(e);
 			Logger.severe("Can't securify URL: "+insecureURL.toString()+", "+e);
 			return null;
 		}

@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 
 import common.FS2Constants;
 import common.HttpUtil;
+import common.Logger;
 import common.Util;
 import common.httpserver.HttpExchange;
 import common.httpserver.HttpHandler;
@@ -105,7 +106,7 @@ public class IndexStatistics implements HttpHandler {
 					lastGenerated = System.currentTimeMillis();
 					
 				} catch (Exception e) {
-					e.printStackTrace();
+					Logger.log(e);
 				} finally {
 					synchronized (genMutex) {
 						generating = false;

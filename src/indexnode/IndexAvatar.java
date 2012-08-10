@@ -87,7 +87,7 @@ public class IndexAvatar implements HttpHandler {
 			
 		} catch (Exception e) {
 			Logger.warn("Exception handling chat request:"+e);
-			e.printStackTrace();
+			Logger.log(e);
 			HttpUtil.simpleResponse(exchange, "Your request couldn't be handled due to an internal exception.", 500);
 		}
 	}

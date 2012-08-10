@@ -189,7 +189,7 @@ public class IndexNode {
 		} catch (UnknownHostException e) {
 			//unknown host exception on localhost? we're in trouble!
 			Logger.severe("This system seems insane: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 			return null;
 		}
 	}
@@ -616,7 +616,7 @@ public class IndexNode {
 				refreshShare();
 			} catch (Throwable e) { //all possible, including vm errors
 				Logger.severe(e.toString()+" caught but not handleable in the share-refresher thread.");
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		}
 		
@@ -652,10 +652,10 @@ public class IndexNode {
 			} catch (IOException e) {
 				Logger.warn("IOException refreshing share: "+name+"... "+e.toString());
 				this.revision = errorRevision; //rollback as it was probably just a network problem.
-				e.printStackTrace();
+				Logger.log(e);
 			} catch (Exception e) {
 				Logger.warn("Exception refreshing share "+name+"... "+e.toString());
-				e.printStackTrace(); //do not bother to rollback. Something more serious is wrong so retrying will just damage our QOS.
+				Logger.log(e); //do not bother to rollback. Something more serious is wrong so retrying will just damage our QOS.
 			}
 			Logger.log("Refresh complete (share "+name+" on "+owner.getAlias()+")");
 		}
@@ -718,7 +718,7 @@ public class IndexNode {
 				if (listed) fs.delistShare(this);
 			} catch (Exception e) {
 				Logger.warn("Exception delisting share: "+e.toString());
-				e.printStackTrace();
+				Logger.log(e);
 			}
 			Logger.log("Share "+name+" on "+owner.getAlias()+" has been delisted.");
 		}

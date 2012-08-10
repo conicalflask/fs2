@@ -19,6 +19,7 @@ import common.httpserver.HttpExchange;
 import common.ChatMessage;
 import common.FS2Constants;
 import common.HttpUtil;
+import common.Logger;
 import common.Sxml;
 import common.Util;
 import common.Sxml.SXMLException;
@@ -281,7 +282,7 @@ public class IndexTemplate {
 		try {
 			return xml.generateString(true);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(e);
 			return "";
 		}
 	}

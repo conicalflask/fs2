@@ -207,7 +207,7 @@ public class NativeFS implements Filesystem {
 				return "http://"+share.getOwner().getURLAddress()+"/shares/"+getPath(true, false);
 			} catch (Exception e){
 				Logger.severe(e.toString());
-				e.printStackTrace();
+				Logger.log(e);
 				return "";
 			}
 		}

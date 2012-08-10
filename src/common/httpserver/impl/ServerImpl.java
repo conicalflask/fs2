@@ -137,17 +137,17 @@ public class ServerImpl extends HttpServer {
 									Logger.warn("Socket timeout while handling HTTP(s) from '"+req.getRemoteSocketAddress()+"': "+e);
 								} catch (IOException e) {
 									Logger.warn("Can't handle HTTP"+(socket instanceof SSLServerSocket ? "S" : "")+" request from "+req.getRemoteSocketAddress()+": "+e);
-									e.printStackTrace();
+									Logger.log(e);
 								} catch (Throwable t) {
 									Logger.severe("Unexpected throwable by http exchange: "+t);
-									t.printStackTrace();
+									Logger.log(t);
 								}
 							}
 						});
 					} catch (IOException e) {
 						if (Thread.currentThread().isInterrupted()) return; //shutdown listener
 						Logger.warn("Can't accept an HTTP"+(socket instanceof SSLServerSocket ? "S" : "")+" request: "+e);
-						e.printStackTrace();
+						Logger.log(e);
 					}
 				}
 			}
@@ -171,7 +171,7 @@ public class ServerImpl extends HttpServer {
 			}
 		} catch (IOException e) {
 			Logger.warn("While closing http server socket: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 

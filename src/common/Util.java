@@ -430,7 +430,7 @@ public abstract class Util {
 			}
 		} catch (IOException e) {
 			Logger.warn(e);
-			e.printStackTrace();
+			Logger.log(e);
 			return false;
 		}
 		return false;
@@ -488,7 +488,7 @@ public abstract class Util {
 			return Util.bytesToHexString(MessageDigest.getInstance("MD5").digest(input.getBytes()));
 		} catch (NoSuchAlgorithmException e) {
 			Logger.severe("Platform does not support MD5: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 			return null;
 		}
 	}

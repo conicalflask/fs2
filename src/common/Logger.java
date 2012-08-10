@@ -22,7 +22,10 @@ public abstract class Logger {
 	private static boolean loggingEnabled = false;
 	private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
 	private static File logFile;
+	//the access log
+	private static File accessFile;
 	private static PrintStream logFileStream;
+	private static PrintStream accessFileStream;
 	private static Level minLoggingLevel = Level.INFO;
 	private static Level minFileLoggingLevel = Level.FINE;
 	private static HashSet<LogListener> registeredModules = new HashSet<LogListener>();
@@ -36,18 +39,22 @@ public abstract class Logger {
 	 * @throws IOException if operation was unsuccessful
 	 */
 	public synchronized static void setLogFileName (String logFileName) {
-		File file = new File(logFileName);
+		File file = new File(logFileName+".log");
+		File aFile = new File(logFileName+".access.log");
 		if (file.exists()) {
 			if (file.canWrite() == false) {
 				Logger.warn("Log file "+logFileName
 						+" exists, but cannot be written to.");
 			} else {
 				logFile = file;
+				accessFile = aFile;
 			}
 		} else {
 			try {
 				if (file.createNewFile()) {
 					logFile = file;
+					accessFile = aFile;
+					aFile.createNewFile();
 				}
 			} catch (IOException e) {
 				Logger.warn("A fresh log file could not be created: "+e);
@@ -74,6 +81,21 @@ public abstract class Logger {
 	
 	public static void severe (Object message) {
 		log(Level.SEVERE, message);
+	}
+	
+	//Records to the access log file (if logging to disk is enabled) with the message specified.
+	public static void access(Object message) {
+		if (accessFile==null) return;
+		try {
+			if (accessFileStream==null) {
+				accessFileStream = new PrintStream(new FileOutputStream(accessFile, true),true);
+			}
+
+			accessFileStream.println(dateFormat.format(new Date()) + message);
+
+		} catch(IOException ex) {
+			ex.printStackTrace();
+		}
 	}
 	
 	/**
@@ -201,6 +223,10 @@ public abstract class Logger {
 		if (logFileStream!=null) {
 			logFileStream.close();
 			logFile=null;
+		}
+		if (accessFileStream!=null) {
+			accessFileStream.close();
+			accessFile=null;
 		}
 	}
 }

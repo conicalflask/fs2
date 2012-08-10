@@ -93,12 +93,12 @@ public class HttpFileHandler implements HttpHandler {
 			}
 		} catch (Exception e) {
 			 Logger.warn("HttpFileHandler: "+e.toString());
-			 e.printStackTrace();
+			 Logger.log(e);
 		} finally {
 			try {
 				exchange.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				Logger.log(e);
 			}
 			synchronized (transfers) {
 				if (transfers.contains(info)) {

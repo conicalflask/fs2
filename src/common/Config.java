@@ -131,7 +131,7 @@ public class Config implements Savable {
 				}
 			} catch (DOMException e) {
 				Logger.warn("Removing key '"+key+"' from config failed: "+e);
-				e.printStackTrace();
+				Logger.log(e);
 			}
 			saver.requestSave();
 		}
@@ -168,7 +168,7 @@ public class Config implements Savable {
 				xml.save();
 			} catch (SXMLException e) {
 				Logger.warn("Configuration could not be saved: "+e);
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		}
 	}
