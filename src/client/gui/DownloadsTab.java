@@ -132,7 +132,7 @@ public class DownloadsTab extends TabItem implements TreeExpansionListener, Acti
 					Desktop.getDesktop().open(displayedFile.getFile().getParentFile());
 				} catch (IOException e) {
 					Logger.log("Couldn't open file browser: "+e);
-					e.printStackTrace();
+					Logger.log(e);
 				}
 			}
 		});
@@ -148,7 +148,7 @@ public class DownloadsTab extends TabItem implements TreeExpansionListener, Acti
 					Desktop.getDesktop().open(displayedFile.getFile());
 				} catch (IOException e) {
 					Logger.log("Couldn't open file browser: "+e);
-					e.printStackTrace();
+					Logger.log(e);
 				}
 			}
 		});

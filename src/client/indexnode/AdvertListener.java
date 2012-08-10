@@ -44,7 +44,7 @@ public class AdvertListener extends Thread {
 			return n;
 		} catch (SocketException e) {
 			Logger.warn("Advertisment reception couldn't be enabled.");
-			e.printStackTrace();
+			Logger.log(e);
 			return null;
 		}
 	}
@@ -86,7 +86,7 @@ public class AdvertListener extends Thread {
 			} catch (Exception e){
 				try { Thread.sleep(FS2Constants.INDEXNODE_ADVERTISE_INTERVAL_MS); } catch (InterruptedException dontcare) {}
 				Logger.warn("Advertisment reception failed: "+e.toString());
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		}
 	}

@@ -247,7 +247,7 @@ public class DownloadDispatcher {
 			if (!ThrottledFileDigester.fs2DigestFile(onDisk, null).equals(f.hash)) return false;
 		} catch (Exception e) {
 			Logger.warn("Couldn't test for file completion on disk: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 			return false;
 		}
 		
@@ -308,7 +308,7 @@ public class DownloadDispatcher {
 			}
 		} catch (IOException e) {
 			Logger.severe("Unable to dispatch a download: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 	
@@ -350,7 +350,7 @@ public class DownloadDispatcher {
 				
 			} catch (Exception e) {
 				Logger.warn("Dispatch iteration failed: "+e);
-				e.printStackTrace();
+				Logger.log(e);
 			}
 
 			//Throttle this loop so that it does not spin exceedinly fast if there is nothing to do.
@@ -420,7 +420,7 @@ public class DownloadDispatcher {
 				}
 			} catch (IOException e) {
 				Logger.severe("Couldn't determine file locations: "+e);
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		}
 	}

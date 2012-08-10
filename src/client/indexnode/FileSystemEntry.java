@@ -212,7 +212,7 @@ public class FileSystemEntry implements TreeNode, Comparable<FileSystemEntry>, L
 				});
 			} catch (Exception t) {
 				Logger.warn("Exception caught in indexnode query thread: "+t);
-				t.printStackTrace();
+				Logger.log(t);
 			}
 		}
 	}
@@ -248,7 +248,7 @@ public class FileSystemEntry implements TreeNode, Comparable<FileSystemEntry>, L
 					});
 				} catch (Exception e) {
 					Logger.warn("Exception during purge() dispatch: "+e);
-					e.printStackTrace();
+					Logger.log(e);
 				}
 			}
 		}

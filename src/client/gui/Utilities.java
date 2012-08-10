@@ -282,7 +282,7 @@ public class Utilities {
 			dispatch(run);
 		} catch (Exception e) {
 			Logger.warn("During dispatch to swing: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 }

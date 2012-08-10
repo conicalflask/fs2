@@ -48,7 +48,7 @@ public class Platform {
 				OS_X_DOCK_ACTIVE = true;
 			} catch (Exception e) {
 				Logger.warn("Unable to apply OS X UI fixes to java...");
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		}
 	}

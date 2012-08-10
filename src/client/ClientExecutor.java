@@ -118,7 +118,7 @@ public class ClientExecutor {
 		} catch (Throwable t) {
 			try {
 				ssvr.shutdown();
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				// Dont care
 			} finally {
 				CriticalFailureHandler.criticalException(t);
@@ -180,7 +180,7 @@ public class ClientExecutor {
 					try {
 						Thread.sleep(FS2Constants.CLIENT_SHUTDOWN_MAX_MILLIS);
 					} catch (InterruptedException e) {
-						e.printStackTrace();
+						Logger.log(e);
 					}
 					Logger.severe("Shutdown took too long, terminating FS2 v"+Version.FS2_CLIENT_VERSION()+"...");
 					Runtime.getRuntime().halt(1);

@@ -110,7 +110,7 @@ public class IndexNode {
 				nodeURL = new URL(su.substring(0,su.length()-1));
 			} catch (MalformedURLException e) {
 				Logger.warn("Fixed indexnode url is invalid!? "+e);
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		}
 		
@@ -201,7 +201,7 @@ public class IndexNode {
 					contactIndexNode(); //if there's IO trouble, we want to drop the indexnode ASAP.
 				} catch (Exception e) {
 					Logger.warn("Malformed or broken chat messages from indexnode '"+getName()+"': "+e);
-					e.printStackTrace();
+					Logger.log(e);
 				}
 			}
 		}
@@ -567,7 +567,7 @@ public class IndexNode {
 					conn.getInputStream().close();
 				} catch (IOException e) {
 					Logger.warn("Exception closing hello input stream: "+e);
-					e.printStackTrace();
+					Logger.log(e);
 				}
 			}
 		} catch (IOException e){
@@ -576,7 +576,7 @@ public class IndexNode {
 		} catch (Exception e) {
 			Logger.warn("Contacting indexnode '"+alias+"' failed: \n"+e.toString());
 			setStatus(Status.UNCONTACTABLE);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 	
@@ -807,7 +807,7 @@ public class IndexNode {
 				contactIndexNode();
 			} catch (Exception e) {
 				Logger.warn("Malformed or broken stats from indexnode '"+getName()+"': "+e);
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		}
 	}
@@ -852,7 +852,7 @@ public class IndexNode {
 			contactIndexNode();
 		} catch (Exception e) {
 			Logger.warn("Couldn't get updated filelists from indexnode '"+getName()+"': "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 		return ret;
 	}
@@ -946,7 +946,7 @@ public class IndexNode {
 			Logger.warn("Couldn't get alternative download sources from indexnode '"+getName()+"': "+e);
 		} catch (Exception e) {
 			Logger.warn("Couldn't get alternative download sources from indexnode '"+getName()+"': "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 		
 		return sources;
@@ -962,7 +962,7 @@ public class IndexNode {
 			return new URL(getActiveLocation().toString()+"/search/?q="+HttpUtil.urlEncode(query));
 		} catch (Exception e) {
 			Logger.severe("Cannot produce a search URL: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 			return null;
 		}
 	}
@@ -977,7 +977,7 @@ public class IndexNode {
 			return new URL(getActiveLocation().toString()+"/browse/"+path);
 		} catch (Exception e) {
 			Logger.severe("Cannot produce a browse URL: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 			return null;
 		}
 	}
@@ -987,7 +987,7 @@ public class IndexNode {
 			return new URL(getActiveLocation().toString()+"/alternatives/"+hash);
 		} catch (Exception e) {
 			Logger.severe("Cannot produce an alterntatives URL: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 			return null;
 		}
 	}
@@ -1000,7 +1000,7 @@ public class IndexNode {
 			return new URL(getActiveLocation().toString()+"/stats");
 		} catch (Exception e) {
 			Logger.severe("Cannot produce a stats URL: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 			return null;
 		}
 	}
@@ -1016,7 +1016,7 @@ public class IndexNode {
 			return new URL(getActiveLocation().toString()+"/chat/?lastmessage="+lastId+(message==null ? "" : "&say="+HttpUtil.urlEncode(message)));
 		} catch (Exception e) {
 			Logger.severe("Cannot produce a chat URL: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 			return null;
 		}
 	}
@@ -1026,7 +1026,7 @@ public class IndexNode {
 			return new URL(getActiveLocation().toString()+"/avatars/"+iconhash+".png");
 		} catch (MalformedURLException e) {
 			Logger.severe("Couldn't construct an avatar icon fetch url: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 			return null;
 		}
 	}
@@ -1041,7 +1041,7 @@ public class IndexNode {
 			return new URL(getActiveLocation().toString()+"/submitavatar/?avatar="+HttpUtil.urlEncode(ssvr.getIndexNodeCommunicator().encodedAvatar));
 		} catch (MalformedURLException e) {
 			Logger.severe("Couldn't construct an avatar icon fetch url: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 			return null;
 		}
 	}

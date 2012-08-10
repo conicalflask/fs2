@@ -14,6 +14,7 @@ import common.httpserver.HttpExchange;
 
 import common.FS2Constants;
 import common.HttpUtil;
+import common.Logger;
 import common.Sxml;
 
 /**
@@ -64,7 +65,7 @@ public class QueueFilter extends Filter {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 	
@@ -124,11 +125,11 @@ public class QueueFilter extends Filter {
 			HttpUtil.simpleResponse(exchange, xml.toString(), 503);
 			
 		} catch (Exception e) {
-			e.printStackTrace();
+			Logger.log(e);
 			try {
 				HttpUtil.simpleResponse(exchange, "Internal exception generating a pretty \"you're queued\" page.", 500);
 			} catch (Exception ohno) {
-				ohno.printStackTrace();
+				Logger.log(ohno);
 			}
 		}
 	}

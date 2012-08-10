@@ -22,7 +22,7 @@ public class CriticalFailureHandler implements UncaughtExceptionHandler {
 			criticalException(e);
 		} else {
 			Logger.severe("Thread '"+t.getName()+"' didn't catch "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 	
@@ -62,7 +62,7 @@ public class CriticalFailureHandler implements UncaughtExceptionHandler {
 		Logger.severe(failureMessage);
 		Notifications.notifyCriticalFailure(failureMessage+"\n\nThe FS2 Working Group (mostly conicalflask) would probably like to hear about this!\nIf this was unexpected please consider enabling logging to disk, and raise an issue at https://github.com/conicalflask/fs2/issues with the log file.\n\nCaused at: "+(t.getStackTrace().length > 0 ? t.getStackTrace()[0] : "unknown"), t.getClass().getSimpleName());
 		if (Logger.getLogFile()!=null) Logger.log("A copy of much of this log is stored in: "+Logger.getLogFile().getAbsolutePath());
-		if (printStackTrace) t.printStackTrace();
+		if (printStackTrace) Logger.log(t);
 		System.err.println("\nExiting disgracefully... Please raise an issue at https://github.com/conicalflask/fs2/issues with the stack trace if the reason is not obvious.");
 		Runtime.getRuntime().halt(1);
 	}

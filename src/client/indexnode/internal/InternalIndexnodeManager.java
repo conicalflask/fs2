@@ -179,7 +179,7 @@ public class InternalIndexnodeManager {
 			executingNode = new IndexNode(nodeConfig, true, indexnodeFilesPath);
 		} catch (Exception e) {
 			Logger.severe("Internal indexnode couldn't be started: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 	
@@ -254,7 +254,7 @@ public class InternalIndexnodeManager {
 				if (advertManager==null) advertManager = new IndexAdvertismentManager(nodeConfig, new AdsImpl());
 			} catch (Exception e) {
 				Logger.warn("Unable to build advertisment framework: "+e);
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		} else {
 			if (advertManager!=null) {

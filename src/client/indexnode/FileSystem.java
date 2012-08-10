@@ -405,7 +405,7 @@ public class FileSystem implements TreeModel, TableModel {
 			});
 		}  catch (Exception e1) {
 			Logger.warn("Exception during treeNodesInserted() dispatch: "+e1);
-			e1.printStackTrace();
+			Logger.log(e1);
 		}
 	}
 
@@ -427,7 +427,7 @@ public class FileSystem implements TreeModel, TableModel {
 			});
 		}  catch (Exception e1) {
 			Logger.warn("Exception during treeNodesRemoved() dispatch: "+e1);
-			e1.printStackTrace();
+			Logger.log(e1);
 		}
 	}
 
@@ -559,7 +559,7 @@ public class FileSystem implements TreeModel, TableModel {
 			});
 		} catch (Exception e1) {
 			Logger.warn("Exception during tableChanged() dispatch: "+e1);
-			e1.printStackTrace();
+			Logger.log(e1);
 		}
 	}
 	

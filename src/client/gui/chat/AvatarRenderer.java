@@ -132,7 +132,7 @@ public class AvatarRenderer extends JPanel implements TableCellRenderer {
 			return true;
 		} catch (IOException e) {
 			Logger.warn("Couldn't load cached image icon from disk: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 			return false;
 		}
 	}

@@ -99,7 +99,7 @@ public class SingleInstanceDetector {
 			socket.close();
 		} catch (IOException e) {
 			Logger.log("Shutting down SingleInstanceDetector: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 	

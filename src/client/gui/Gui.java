@@ -161,7 +161,7 @@ public class Gui {
 		} catch (Exception e) {
 			mainFrame.setStatusHint("Can't set that Look and Feel!");
 			Logger.warn("Couldn't set system look and feel.");
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 

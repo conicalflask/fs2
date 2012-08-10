@@ -60,7 +60,7 @@ public class Share {
 				
 			} catch (Exception e) {
 				Logger.severe("Exception during share refresh: "+e);
-				e.printStackTrace();
+				Logger.log(e);
 				causeOtherDescription = e.toString();
 				setStatus(Status.ERROR);
 				cause = ErrorCause.OTHER;
@@ -91,7 +91,7 @@ public class Share {
 						}
 					} catch (IOException e) {
 						Logger.warn("Unable to check for canonical containment while building filelist: "+e);
-						e.printStackTrace();
+						Logger.log(e);
 						continue;
 					} 
 					
@@ -182,7 +182,7 @@ public class Share {
 				return !file.getAbsolutePath().equals(file.getCanonicalPath());
 			} catch (IOException e) {
 				Logger.severe("Symlink detection failed!:"+e);
-				e.printStackTrace();
+				Logger.log(e);
 				return false;
 			}
 		}
@@ -286,7 +286,7 @@ public class Share {
 				
 			} catch (FileNotFoundException what) {
 				Logger.severe("File that exists couldn't be found!?: "+what);
-				what.printStackTrace();
+				Logger.log(what);
 			}
 		} else {
 			newFileList(name);
@@ -368,7 +368,7 @@ public class Share {
 			return true;
 		} catch (Exception e) {
 			Logger.severe("Share filelist couldn't be saved: "+e.toString());
-			e.printStackTrace();
+			Logger.log(e);
 			causeOtherDescription = e.toString();
 			cause = ErrorCause.UNSAVEABLE;
 			setStatus(Status.ERROR);

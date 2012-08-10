@@ -29,6 +29,7 @@ import client.indexnode.ChatListener;
 import client.indexnode.IndexNode;
 
 import common.ChatMessage;
+import common.Logger;
 
 @SuppressWarnings("serial")
 public class NodeChatTab extends JPanel implements MouseListener, ChatListener, ActionListener, KeyListener {
@@ -161,7 +162,7 @@ public class NodeChatTab extends JPanel implements MouseListener, ChatListener, 
 					chatLogScrollPane.getVerticalScrollBar().setValue(chatLogScrollPane.getVerticalScrollBar().getMaximum());
 				}
 			} catch (BadLocationException e) {
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		}
 	}
@@ -197,7 +198,7 @@ public class NodeChatTab extends JPanel implements MouseListener, ChatListener, 
 					
 					chatLogScrollPane.getVerticalScrollBar().setValue(chatLogScrollPane.getVerticalScrollBar().getMaximum());
 				} catch (BadLocationException e) {
-					e.printStackTrace();
+					Logger.log(e);
 				}
 			}
 		}

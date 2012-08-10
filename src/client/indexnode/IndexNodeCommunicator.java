@@ -163,7 +163,7 @@ public class IndexNodeCommunicator implements TableModel {
 				registerNewIndexNode(new URL(url), 0, key);
 			} catch (MalformedURLException e) {
 				Logger.warn("IndexNode URL: '"+conf.getString(key+"/path")+"' specified in the configuration file is invalid.");
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		}
 		setupAdvertListeningIfNeeded();
@@ -487,7 +487,7 @@ public class IndexNodeCommunicator implements TableModel {
 		}
 		catch (Exception e) {
 			Logger.severe("Error generating share list: "+e.toString());
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 
@@ -593,7 +593,7 @@ public class IndexNodeCommunicator implements TableModel {
 			});
 		} catch (Exception e) {
 			Logger.warn("Exception dispatching notifyIndexNodeInserted(): "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
  	}
 	
@@ -612,7 +612,7 @@ public class IndexNodeCommunicator implements TableModel {
 			});
 		} catch (Exception e) {
 			Logger.warn("Exception dispatching notifyIndexNodeRemoved(): "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 	
@@ -631,7 +631,7 @@ public class IndexNodeCommunicator implements TableModel {
 			}, false);
 		} catch (Exception e) {
 			Logger.warn("Exception dispatching notifyIndexNodeChanged(): "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 

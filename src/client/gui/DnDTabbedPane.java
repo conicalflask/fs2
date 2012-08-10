@@ -33,6 +33,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 
+import common.Logger;
+
 /**
  * A drag and droppable JTabbedPane... This is a massive oversight for swing!
  * 
@@ -141,7 +143,7 @@ class DnDTabbedPane extends JTabbedPane {
                 try{
                     e.startDrag(DragSource.DefaultMoveDrop, t, dsl);
                 }catch(InvalidDnDOperationException idoe) {
-                    idoe.printStackTrace();
+                    Logger.log(idoe);
                 }
             }
         };

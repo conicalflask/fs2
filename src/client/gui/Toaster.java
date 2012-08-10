@@ -44,6 +44,8 @@ import javax.swing.JTextArea;
 import javax.swing.JWindow;
 import javax.swing.border.TitledBorder;
 
+import common.Logger;
+
 import client.gui.TabItem.FS2Tab;
 import client.gui.chat.NodeChatTab;
 
@@ -320,7 +322,7 @@ public class Toaster {
 				toaster.setVisible(false);
 				toaster.dispose();
 			} catch (Exception e) {
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		}
 	}

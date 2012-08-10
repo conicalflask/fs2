@@ -71,7 +71,7 @@ public class URLConnWorker extends DownloadWorker {
 				Logger.log("Download '"+chunk.getOwner().getFile().getName()+"'cancelled/interrupted before it even started.");
 			} catch (Exception e) {
 				Logger.warn("chunkStarted event dispatch: "+e);
-				e.printStackTrace();
+				Logger.log(e);
 			}
 			InputStream instream = null;
 			try {
@@ -386,7 +386,7 @@ public class URLConnWorker extends DownloadWorker {
 			}
 		} catch (IOException e) {
 			Logger.warn("Unable to close download file: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 	

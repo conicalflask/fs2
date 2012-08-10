@@ -167,7 +167,7 @@ public class ShareServer implements TableModel {
 					});
 				} catch (Exception e) {
 					Logger.warn("Couldn't insert into uploads table: "+e);
-					e.printStackTrace();
+					Logger.log(e);
 				}
 			}
 		}
@@ -194,7 +194,7 @@ public class ShareServer implements TableModel {
 					});
 				} catch (Exception e) {
 					Logger.warn("Couldn't remove from uploads table: "+e);
-					e.printStackTrace();
+					Logger.log(e);
 				}
 			}
 		}
@@ -238,7 +238,7 @@ public class ShareServer implements TableModel {
 						});
 					} catch (Exception e) {
 						Logger.warn("Couldn't update uploads table: "+e);
-						e.printStackTrace();
+						Logger.log(e);
 					}
 				}
 			}
@@ -551,7 +551,7 @@ public class ShareServer implements TableModel {
 			listShare(name, location);
 		} catch (IOException e) {
 			Logger.severe("Couldn't add new share: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 		communicator.sharesChanged();
 		Logger.log("Share '"+name+"' sucessfully added.");
@@ -770,7 +770,7 @@ public class ShareServer implements TableModel {
 			});
 		} catch (Exception e1) {
 			Logger.warn("Couldn't notify Shares table listeners: "+e1);
-			e1.printStackTrace();
+			Logger.log(e1);
 		}
 	}
 

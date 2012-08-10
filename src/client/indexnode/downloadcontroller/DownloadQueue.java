@@ -405,7 +405,7 @@ public class DownloadQueue implements Serializable, TreeModel, Savable, NewPeerL
 				}, false);
 			} catch (Exception e) {
 				Logger.warn("Couldn't dispatch file submission event: "+e);
-				e.printStackTrace();
+				Logger.log(e);
 			}
 		}
 		
@@ -1171,7 +1171,7 @@ public class DownloadQueue implements Serializable, TreeModel, Savable, NewPeerL
 			}, false);
 		} catch (Exception e) {
 			Logger.warn("Couldn't dispatch submission complete event: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 
@@ -1324,7 +1324,7 @@ public class DownloadQueue implements Serializable, TreeModel, Savable, NewPeerL
 				return s;
 			} catch (Exception e) {
 				Logger.warn("The download queue couldn't be loaded. Starting afresh...");
-				e.printStackTrace();
+				Logger.log(e);
 				return new DownloadQueue(comm, downloadController);
 			}
 		}
@@ -1360,7 +1360,7 @@ public class DownloadQueue implements Serializable, TreeModel, Savable, NewPeerL
 					//Logger.log("Queue saved");
 				} catch (Exception e) {
 					Logger.warn("Couldn't save download queue to a file.");
-					e.printStackTrace();
+					Logger.log(e);
 				} finally {
 					saveWorker = null;
 				}
@@ -1424,7 +1424,7 @@ public class DownloadQueue implements Serializable, TreeModel, Savable, NewPeerL
 									}
 								} catch (Exception couldnt) {
 									Logger.log("Couldn't update download queue tree: "+couldnt);
-									couldnt.printStackTrace();
+									Logger.log(couldnt);
 								}
 							}
 						}

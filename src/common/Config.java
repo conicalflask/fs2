@@ -251,7 +251,9 @@ public class Config implements Savable {
 	
 	public Long getLong(String key) {
 		try {
-			return Long.parseLong(getString(key));
+			String stored = getString(key);
+			if (stored.equals("")) return 0L;
+			return Long.parseLong(stored);
 		} catch (NumberFormatException e) {
 			Logger.warn("Configuration item: '"+key+"' must be numeric, but it's not. Assuming zero.");
 			return 0L;

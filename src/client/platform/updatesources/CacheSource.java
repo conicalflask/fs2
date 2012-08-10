@@ -5,6 +5,8 @@ import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.LinkedList;
 
+import common.Logger;
+
 import client.platform.Platform;
 
 /**
@@ -30,7 +32,7 @@ public class CacheSource extends UpdateSource {
 		try {
 			return new CodeUpdate(potentials.getLast().toURI().toURL(),potentials.getLast().getName(),"Latest cached update. No further information available.", "Local update cache", "?.?.?");
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			Logger.log(e);
 			return null;
 		}
 	}

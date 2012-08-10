@@ -165,7 +165,8 @@ public class Notifications {
 			d.setBounds(nx, ny, w, h);
 		} catch (Exception e) {
 			Logger.warn("Unable to runtime-bork ProgressMonitor.class: "+e);
-			e.printStackTrace();
+			Logger.log("This is not a problem!");
+			Logger.log(e);
 		}
 	}
 

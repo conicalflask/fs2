@@ -1,5 +1,6 @@
 package common;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -59,6 +60,10 @@ public abstract class Logger {
 		log(Level.FINE, message);
 	}
 	
+	/**
+	 * Logs the message.
+	 * @param message The message to log. This will be toString()'d for most objects or for throwables the stacktrace will be used.
+	 */
 	public static void log (Object message) {
 		log(Level.INFO, message);
 	}
@@ -79,7 +84,7 @@ public abstract class Logger {
 	 * appended to all the outputs where the given level is higher than
 	 * that output's level threshold.
 	 * @param level - One of the message level identifiers, e.g. SEVERE
-	 * @param message - The string message
+	 * @param message - The string message. If this message is throwable then the stacktrace will be written instead.
 	 */
 	private synchronized static void log (Level level, Object message) {
 		if (loggingEnabled) {
@@ -107,6 +112,16 @@ public abstract class Logger {
 	}
 	
 	private static void logOut(Level level, Object message) {
+		
+		//If it's a throwable as a message, print the stack trace instead
+		if (message instanceof Throwable) {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			PrintStream ps = new PrintStream(bos);
+			((Throwable) message).printStackTrace(ps);
+			ps.flush();
+			message = bos.toString();
+			ps.close();
+		}
 		
 		if (level.intValue() >= minLoggingLevel.intValue()) {
 			appendLog(level, message);

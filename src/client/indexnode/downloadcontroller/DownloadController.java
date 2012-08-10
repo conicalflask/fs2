@@ -10,6 +10,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
 import common.FS2Constants;
+import common.Logger;
 import common.ProgressTracker;
 import common.Util;
 import common.Util.Deferrable;
@@ -189,7 +190,7 @@ public class DownloadController implements TableModel {
 		} catch (InterruptedException e) {
 			throw e;
 		} catch (InvocationTargetException e) {
-			e.printStackTrace();
+			Logger.log(e);
 		}
 		
 	}

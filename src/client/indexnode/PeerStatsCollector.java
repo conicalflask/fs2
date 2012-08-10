@@ -550,7 +550,7 @@ public class PeerStatsCollector implements Serializable, TableModel, Savable {
 				return s;
 			} catch (Exception e) {
 				Logger.warn("Stored peer statistics couldn't be loaded. Starting afresh...");
-				e.printStackTrace();
+				Logger.log(e);
 				return new PeerStatsCollector();
 			}
 		}
@@ -573,7 +573,7 @@ public class PeerStatsCollector implements Serializable, TableModel, Savable {
 			}
 		} catch (Exception e) {
 			Logger.warn("Couldn't save peer stats to a file.");
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 	
@@ -684,7 +684,7 @@ public class PeerStatsCollector implements Serializable, TableModel, Savable {
 			}, false);
 		} catch (Exception e1) {
 			Logger.warn("Couldn't notify peer stats table listeners: "+e1);
-			e1.printStackTrace();
+			Logger.log(e);
 		}
 	}
 	

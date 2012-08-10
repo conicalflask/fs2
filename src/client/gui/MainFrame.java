@@ -214,7 +214,7 @@ public class MainFrame extends JFrame implements ComponentListener, WindowListen
 			
 		} catch (Exception e) {
 			Logger.warn("Couldn't load tabs from configuration file: "+e);
-			e.printStackTrace();
+			Logger.log(e);
 		}
 	}
 	

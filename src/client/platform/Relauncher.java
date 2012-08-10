@@ -69,7 +69,7 @@ public class Relauncher {
 		} catch (Exception e) {
 			Logger.severe("The update is corrupt or incompatible with this version of FS2.");
 			Logger.log("This version of FS2 will continue to execute.");
-			e.printStackTrace();
+			Logger.log(e);
 			return false;
 		}
 	}
@@ -126,7 +126,7 @@ public class Relauncher {
 		} catch (Exception e) {
 			Logger.severe("Couldn't relaunch the JVM to increase the heapsize.");
 			Logger.log("This version of FS2 will continue to execute.");
-			e.printStackTrace();
+			Logger.log(e);
 			return false;
 		}
 	}

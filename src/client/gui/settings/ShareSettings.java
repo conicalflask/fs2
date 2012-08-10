@@ -218,7 +218,7 @@ public class ShareSettings extends SettingsPanel implements ListSelectionListene
 				frame.setStatusHint(new StatusHint(SettingsTab.TICK, "Share added! (may take a little while to appear if the file list needs loading!)"));
 			} catch (Exception ex) {
 				Logger.log("Exception adding share: "+e);
-				ex.printStackTrace();
+				Logger.log(ex);
 				frame.setStatusHint(new StatusHint(SettingsTab.ERROR, "Share couldn't be added!"));
 			}
 		}
@@ -261,7 +261,7 @@ public class ShareSettings extends SettingsPanel implements ListSelectionListene
 				Desktop.getDesktop().open(s.getPath());
 			} catch (IOException e) {
 				Logger.warn("Couldn't open a file browser for some reason: "+e);
-				e.printStackTrace();
+				Logger.log(e);
 			}
 	}
 
