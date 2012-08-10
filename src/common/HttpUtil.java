@@ -201,6 +201,8 @@ public class HttpUtil {
 			h.add("Content-Transfer-Encoding","binary");
 			h.add("Content-Length", Long.toString(responseLength));
 			h.add("Content-Type", "application/octet-stream");
+			Logger.access(info.getAlias()+": "+fileToSend.getPath()+"["+info.getPosition()+","+((info.getRemaining()+info.getPosition())-1)+")");
+			
 			exchange.sendResponseHeaders(responseCode, responseLength);
 			OutputStream response = exchange.getResponseBody();
 			writeFileToStream(fileToSend, response, info);
