@@ -144,12 +144,29 @@ public class DownloadsTab extends TabItem implements TreeExpansionListener, Acti
 		openldFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent ae) {
-				try {
-					Desktop.getDesktop().open(displayedFile.getFile());
-				} catch (IOException e) {
-					Logger.log("Couldn't open file browser: "+e);
-					Logger.log(e);
-				}
+				openldFile.setEnabled(false);
+				openldFile.setText("Launching...");
+				Thread inBackground = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							Desktop.getDesktop().open(displayedFile.getFile());
+							Utilities.edispatch(new Runnable() {
+								@Override
+								public void run() {
+									openldFile.setEnabled(true);
+									openldFile.setText("Open "+displayedFile.getFile().getName());
+								}
+							});
+						}  catch (IOException e) {
+							Logger.log("Couldn't open file: "+e);
+							Logger.log(e);
+						}
+					}
+				});
+				inBackground.setDaemon(true);
+				inBackground.setName("GUI bg: opening last downloaded file");
+				inBackground.start();
 			}
 		});
 		
