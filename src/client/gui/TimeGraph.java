@@ -23,9 +23,9 @@ import common.Util;
  * points with negative values are passed, they will not be drawn.
  * @author Andy
  */
+@SuppressWarnings("serial")
 public class TimeGraph extends JPanel implements ComponentListener {
 
-	private static final long serialVersionUID = 9073578486549895961L;
 	private int viewHeight = 100;
 	private int viewWidth = 100;
 	
@@ -131,41 +131,43 @@ public class TimeGraph extends JPanel implements ComponentListener {
 		g.setRenderingHints(rh);
 		
 		// Calculate bar widths
-		double barWidth = (double)viewWidth / (double)numPoints;
+		double barWidth = (double)viewWidth / (double)(numPoints - 1);
 		double barScale = (double)viewHeight / max;
 		
+		// Graph view port size
 		int x = Math.round(viewWidth);
 		int y = Math.round(viewHeight);
-		int w = 0;
-		int width = (int)Math.round(barWidth);
-		
-		// Create a polygon for each trace and give it a start point
+
+		// For each trace
 		Polygon[] p = new Polygon[numTraces];
 		for (int i = 0; i < p.length; i++) {
+			// Create a polygon give it a start point
 			p[i] = new Polygon();
 			p[i].addPoint(viewWidth, viewHeight);
-		}
-		
-		// Add the data points to the polygons
-		for (double[] points : data) {
-			for (int i = 0; i < points.length; i++) {
-				p[i].addPoint(x+w, y-(int)Math.round(barScale * points[i]));
+			
+			// Add a point for each data point
+			int j = 0;
+			int point_x = 0;
+			int point_y = 0;
+			for (double[] points : data) {
+				point_x = x - (int) Math.round(barWidth * (double)j);
+				point_y = y - (int) Math.round(barScale * points[i]);
+				p[i].addPoint(point_x, point_y);
+				j++;
 			}
-			w -= width;
-		}
-		
-		// Give an alpha gradient fill to each polygon 
-		for (int i = 0; i < p.length; i++) {
-			p[i].addPoint(x+w, viewHeight);
+			
+			// Add the last (farthest left) data point directly down to "0"
+			// under the last real data point to finish creating the shape
+			p[i].addPoint(point_x, viewWidth);
+			
+			// Give an alpha gradient fill
 			Color color1 = new Color(traceColors[i].getRed(), traceColors[i].getGreen(), traceColors[i].getBlue(), 96);
 			Color color2 = new Color(traceColors[i].getRed(), traceColors[i].getGreen(), traceColors[i].getBlue(), 64);
 			GradientPaint grad = new GradientPaint(0,viewHeight/2,color1,0,viewHeight,color2);
 			g.setPaint(grad);
 			g.fillPolygon(p[i]);
-		}
-		
-		// Give a solid colour trace for each polygon
-		for (int i = 0; i < p.length; i++) {
+			
+			// Give a solid colour trace
 			g.setColor(traceColors[i]);
 			g.drawPolygon(p[i]);
 		}
