@@ -48,8 +48,8 @@ public class Share {
 				tracker.setExpectedMaximum(list.root.fileCount);
 				if (list.root.fileCount == 0l) {
 					// We don't have a clue, so set off a counter worker to find out
-					fileCounter = new FileCounter();
-					fileCounter.run();
+					fileCounter = new FileCounter(tracker);
+					(new Thread(fileCounter)).start();
 				}
 				refreshActive = true;
 				if (!location.exists()) {
@@ -204,8 +204,13 @@ public class Share {
 		 */
 		private class FileCounter implements Runnable {
 
-			volatile boolean shouldStop = false;
-			private  int     fileCount  = 0;
+			volatile boolean         shouldStop = false;
+			private  int             fileCount  = 0;
+			private  ProgressTracker tracker;
+			
+			public FileCounter(ProgressTracker tracker) {
+				this.tracker = tracker;
+			}
 			
 			public void shutdown() {
 				shouldStop = true;
@@ -220,7 +225,6 @@ public class Share {
 				} catch (Exception e) {
 					Logger.severe("Exception during file count: "+e);
 					Logger.log(e);
-				} finally {
 					// As something went wrong, just set the max expected to zero
 					tracker.setExpectedMaximum(0);
 				}
@@ -230,16 +234,16 @@ public class Share {
 				File[] dirChildren = directory.listFiles();
 				if (dirChildren!=null) {
 					for (final File f : dirChildren) {
-						//Here is the 'main' loop, items place here will happen before each file is considered.
+						// Here is the 'main' loop, items place here will happen before each file is considered.
 						if (shouldStop) return;
 						Util.executeNeverFasterThan(FS2Constants.CLIENT_EVENT_MIN_INTERVAL, notifyShareServer);
 						
-						if (f.getPath().endsWith(".incomplete")) continue; //don't share incomplete files as they can hash collide! (this effectively pollutes FS2 networks of large files :S)
-						if (f.isDirectory() && isSymlink(f)) continue; //forbid linked directories to avoid infinite loops.
+						if (f.getPath().endsWith(".incomplete")) continue; // we don't share incomplete files
+						if (f.isDirectory() && isSymlink(f)) continue; // forbid linked directories to avoid infinite loops.
 						
 						try {
 							if (f.isFile() && !Util.isWithin(f, canonicalLocation)) {
-								continue; //ignore symlinks to outside of the share as these cannot be downloaded.
+								continue; // ignore symlinks to outside of the share as these cannot be downloaded.
 							}
 						} catch (IOException e) {
 							Logger.warn("Unable to check for canonical containment while building filelist count: "+e);
@@ -311,7 +315,20 @@ public class Share {
 	public String describeStatus() {
 		switch (status) {
 		case BUILDING:
-			return "building "+(refreshActive ? "at "+new NiceMagnitude((long)activeRefresh.tracker.getSpeed(),"") +" files/s" : "(queued)");
+			try {
+				ProgressTracker tr = activeRefresh.tracker;
+				String msg = "building";
+				if (!refreshActive) {
+					msg += " (queued)";
+				} else {
+					msg += " at " + new NiceMagnitude((long)activeRefresh.tracker.getSpeed(),"") + " files/s";
+					if (tr.getMaximum() > tr.getPosition()) {
+						// Maximum expected is actually set, meaning we must have scanned for file counts
+						msg += ", ETR: " + tr.describeTimeRemaining();
+					}
+				}
+				return msg;
+			} catch (NullPointerException n) {};
 		case REFRESHING:
 			try {
 				ProgressTracker tr = activeRefresh.tracker;
