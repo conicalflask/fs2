@@ -33,15 +33,24 @@ public class Share {
 		ProgressTracker tracker = new ProgressTracker();
 		long changed = 0;
 		long buildSizeSoFar = 0;
+		FileCounter fileCounter = null;
 		
 		public void shutdown() {
 			shouldStop = true;
+			if (fileCounter != null) {
+				fileCounter.shutdown();
+			}
 		}
 		
 		@Override
 		public void run() {
 			try {
 				tracker.setExpectedMaximum(list.root.fileCount);
+				if (list.root.fileCount == 0l) {
+					// We don't have a clue, so set off a counter worker to find out
+					fileCounter = new FileCounter();
+					fileCounter.run();
+				}
 				refreshActive = true;
 				if (!location.exists()) {
 					setStatus(Status.ERROR);
@@ -185,6 +194,70 @@ public class Share {
 				Logger.log(e);
 				return false;
 			}
+		}
+	
+		/***
+		 * A file counter which just recurses directories in order to find out how many
+		 * files are within it.
+		 * @author r4abigman
+		 *
+		 */
+		private class FileCounter implements Runnable {
+
+			volatile boolean shouldStop = false;
+			private  int     fileCount  = 0;
+			
+			public void shutdown() {
+				shouldStop = true;
+			}
+			
+			@Override
+			public void run() {
+				try {
+					//Always start on a canonical file so that symlink detection works.
+					countDirectory(canonicalLocation);
+					if (shouldStop) return;
+				} catch (Exception e) {
+					Logger.severe("Exception during file count: "+e);
+					Logger.log(e);
+				} finally {
+					// As something went wrong, just set the max expected to zero
+					tracker.setExpectedMaximum(0);
+				}
+			}
+			
+			void countDirectory(File directory) {
+				File[] dirChildren = directory.listFiles();
+				if (dirChildren!=null) {
+					for (final File f : dirChildren) {
+						//Here is the 'main' loop, items place here will happen before each file is considered.
+						if (shouldStop) return;
+						Util.executeNeverFasterThan(FS2Constants.CLIENT_EVENT_MIN_INTERVAL, notifyShareServer);
+						
+						if (f.getPath().endsWith(".incomplete")) continue; //don't share incomplete files as they can hash collide! (this effectively pollutes FS2 networks of large files :S)
+						if (f.isDirectory() && isSymlink(f)) continue; //forbid linked directories to avoid infinite loops.
+						
+						try {
+							if (f.isFile() && !Util.isWithin(f, canonicalLocation)) {
+								continue; //ignore symlinks to outside of the share as these cannot be downloaded.
+							}
+						} catch (IOException e) {
+							Logger.warn("Unable to check for canonical containment while building filelist count: "+e);
+							Logger.log(e);
+							continue;
+						}
+						
+						if (f.isDirectory()) {
+							countDirectory(f);
+						} else if (f.isFile()) {
+							fileCount++;
+						}
+					}
+					// Update the expected maximum of the tracker
+					tracker.setExpectedMaximum(fileCount);
+				}
+			}
+			
 		}
 	}
 	
