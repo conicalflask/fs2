@@ -33,15 +33,24 @@ public class Share {
 		ProgressTracker tracker = new ProgressTracker();
 		long changed = 0;
 		long buildSizeSoFar = 0;
+		FileCounter fileCounter = null;
 		
 		public void shutdown() {
 			shouldStop = true;
+			if (fileCounter != null) {
+				fileCounter.shutdown();
+			}
 		}
 		
 		@Override
 		public void run() {
 			try {
 				tracker.setExpectedMaximum(list.root.fileCount);
+				if (list.root.fileCount == 0l) {
+					// We don't have a clue, so set off a counter worker to find out
+					fileCounter = new FileCounter(tracker);
+					(new Thread(fileCounter)).start();
+				}
 				refreshActive = true;
 				if (!location.exists()) {
 					setStatus(Status.ERROR);
@@ -186,6 +195,74 @@ public class Share {
 				return false;
 			}
 		}
+	
+		/***
+		 * A file counter which just recurses directories in order to find out how many
+		 * files are within it.
+		 * @author r4abigman
+		 *
+		 */
+		private class FileCounter implements Runnable {
+
+			volatile boolean         shouldStop = false;
+			private  int             fileCount  = 0;
+			private  ProgressTracker tracker;
+			
+			public FileCounter(ProgressTracker tracker) {
+				this.tracker = tracker;
+			}
+			
+			public void shutdown() {
+				shouldStop = true;
+			}
+			
+			@Override
+			public void run() {
+				try {
+					//Always start on a canonical file so that symlink detection works.
+					countDirectory(canonicalLocation);
+					if (shouldStop) return;
+				} catch (Exception e) {
+					Logger.severe("Exception during file count: "+e);
+					Logger.log(e);
+					// As something went wrong, just set the max expected to zero
+					tracker.setExpectedMaximum(0);
+				}
+			}
+			
+			void countDirectory(File directory) {
+				File[] dirChildren = directory.listFiles();
+				if (dirChildren!=null) {
+					for (final File f : dirChildren) {
+						// Here is the 'main' loop, items place here will happen before each file is considered.
+						if (shouldStop) return;
+						Util.executeNeverFasterThan(FS2Constants.CLIENT_EVENT_MIN_INTERVAL, notifyShareServer);
+						
+						if (f.getPath().endsWith(".incomplete")) continue; // we don't share incomplete files
+						if (f.isDirectory() && isSymlink(f)) continue; // forbid linked directories to avoid infinite loops.
+						
+						try {
+							if (f.isFile() && !Util.isWithin(f, canonicalLocation)) {
+								continue; // ignore symlinks to outside of the share as these cannot be downloaded.
+							}
+						} catch (IOException e) {
+							Logger.warn("Unable to check for canonical containment while building filelist count: "+e);
+							Logger.log(e);
+							continue;
+						}
+						
+						if (f.isDirectory()) {
+							countDirectory(f);
+						} else if (f.isFile()) {
+							fileCount++;
+						}
+					}
+					// Update the expected maximum of the tracker
+					tracker.setExpectedMaximum(fileCount);
+				}
+			}
+			
+		}
 	}
 	
 	public enum Status {ACTIVE, REFRESHING, BUILDING, ERROR, SHUTDOWN, SAVING};
@@ -238,7 +315,20 @@ public class Share {
 	public String describeStatus() {
 		switch (status) {
 		case BUILDING:
-			return "building "+(refreshActive ? "at "+new NiceMagnitude((long)activeRefresh.tracker.getSpeed(),"") +" files/s" : "(queued)");
+			try {
+				ProgressTracker tr = activeRefresh.tracker;
+				String msg = "building";
+				if (!refreshActive) {
+					msg += " (queued)";
+				} else {
+					msg += " at " + new NiceMagnitude((long)activeRefresh.tracker.getSpeed(),"") + " files/s";
+					if (tr.getMaximum() > tr.getPosition()) {
+						// Maximum expected is actually set, meaning we must have scanned for file counts
+						msg += ", ETR: " + tr.describeTimeRemaining();
+					}
+				}
+				return msg;
+			} catch (NullPointerException n) {};
 		case REFRESHING:
 			try {
 				ProgressTracker tr = activeRefresh.tracker;
