@@ -20,21 +20,21 @@
 
   <target name="compilecommon" depends="init"
         description="compile the common library" >
-  	<javac debug="true" sourcepath="" srcdir="${src}" destdir="${build}">
+  	<javac includeantruntime="false" debug="true" sourcepath="" srcdir="${src}" destdir="${build}">
   	  <include name="common/**/*.java"/>
   	</javac>
   </target>
   
   <target name="compileclient" depends="compilecommon,compileindexnode"
         description="compile the client" >
-    <javac debug="true" classpath="${build}/common;${build}/indexnode" sourcepath="" srcdir="${src}" destdir="${build}">
+    <javac includeantruntime="false" debug="true" classpath="${build}/common;${build}/indexnode" sourcepath="" srcdir="${src}" destdir="${build}">
       <include name="client/**/*.java"/>
     </javac>
   </target>
   
   <target name="compileindexnode" depends="compilecommon"
         description="compile the indexnode" >
-    <javac debug="true" classpath="${build}/common" sourcepath="" srcdir="${src}" destdir="${build}">
+    <javac includeantruntime="false" debug="true" classpath="${build}/common" sourcepath="" srcdir="${src}" destdir="${build}">
       <include name="indexnode/**/*.java"/>
     </javac>
   </target>
