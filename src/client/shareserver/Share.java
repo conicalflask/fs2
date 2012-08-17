@@ -49,7 +49,10 @@ public class Share {
 				if (list.root.fileCount == 0l) {
 					// We don't have a clue, so set off a counter worker to find out
 					fileCounter = new FileCounter(tracker);
-					(new Thread(fileCounter)).start();
+					Thread fct = new Thread(fileCounter);
+					fct.setDaemon(true);
+					fct.setName("Filecounter for share: "+getName());
+					fct.start();
 				}
 				refreshActive = true;
 				if (!location.exists()) {
