@@ -21,6 +21,7 @@ public class Version {
 	 */
 	static {
 		FS2_VERSION_DESCRIPTIONS = new HashMap<String, String>();
+		FS2_VERSION_DESCRIPTIONS.put("0.10.1", "Access logs, open download buttons and bug fixes!");
 		FS2_VERSION_DESCRIPTIONS.put("0.9.5", "Access logs and better logging.");
 		FS2_VERSION_DESCRIPTIONS.put("0.9.4", "Now with open buttons for downloads and shares.");
 		FS2_VERSION_DESCRIPTIONS.put("0.9.3", "Shares now refresh properly, and source is now included in the .jar file!");
@@ -49,7 +50,7 @@ public class Version {
 	/** The version identifier for the client.
 	 * This is used by the client to identify new versions 
 	 * DONT FORGET TO DESCRIBE THIS VERSION! */
-	public static final Integer[] FS2_CLIENT_VERSION_BITS = {0,9,5};
+	public static final Integer[] FS2_CLIENT_VERSION_BITS = {0,10,1};
 	
 	//Into a string:
 	public static final String FS2_CLIENT_VERSION() { return Util.join(FS2_CLIENT_VERSION_BITS,"."); }
@@ -58,7 +59,7 @@ public class Version {
 	public static final String FS2_CLIENT_NAME = "fs2client";
 	
 	/** The fancy release name for this minor version of FS2 */
-	public static final String FS2_CLIENT_RELEASE = "It's Made of Paper";
+	public static final String FS2_CLIENT_RELEASE = "It's Made of Paper (i46 edition)";
 	
 	public static void main(String[] args) {
 		if (args.length==0) {
