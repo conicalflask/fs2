@@ -855,6 +855,7 @@ public class IndexNode {
 		
 		fs2Filter.setAlias(conf.getString(IK.ALIAS));
 		fs2Filter.setPort(onPort);
+		fs2Filter.setUID(conf.getLong(IK.ADVERTUID));
 		
 		hh = new HelloHandler();
 		ib = new IndexBrowser(fs);
