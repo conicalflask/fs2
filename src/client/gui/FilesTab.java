@@ -51,6 +51,7 @@ import javax.swing.tree.TreePath;
 import common.FS2Constants;
 import common.ProgressTracker;
 import common.Util;
+
 import client.indexnode.FileSystem;
 import client.indexnode.FileSystemEntry;
 import client.indexnode.ListableEntry;
@@ -312,7 +313,7 @@ public class FilesTab extends TabItem implements 	ActionListener,
 	Timer collapseTimer;
 	
 	BrowseTreeCellRenderer browseTreeRenderer;
-
+	
 	JSplitPane createBrowseSection() {
 		spinner = new LoadingAnimationHelper();
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -348,10 +349,10 @@ public class FilesTab extends TabItem implements 	ActionListener,
 		filesTable.addMouseListener(this);
 		filesTable.getSelectionModel().addListSelectionListener(this);
 		filesTable.getColumn(fs.getColumnName(0)).setCellRenderer(new FilesTableNameRenderer());
-
+		
 		JScrollPane filesView = new JScrollPane(filesTable);
 		
-		upButton = new JButton("Up");
+		upButton = new JButton("Up", frame.gui.util.getImage("navigateup"));
 		upButton.addActionListener(this);
 		
 		JPanel directoryPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
