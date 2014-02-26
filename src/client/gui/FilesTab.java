@@ -49,6 +49,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 import common.FS2Constants;
+import common.HttpUtil;
 import common.ProgressTracker;
 import common.Util;
 
@@ -642,7 +643,7 @@ public class FilesTab extends TabItem implements 	ActionListener,
 			if (fse.isSearch()) {
 				currentDirectory.setText(fse.getSearchTerms());
 			} else if (fse.isDirectory()) {
-				currentDirectory.setText(fse.getIndexNodePath());
+				currentDirectory.setText(HttpUtil.urlDecode(fse.getIndexNodePath()));
 			} else {
 				currentDirectory.setText("");
 			}
