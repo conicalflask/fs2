@@ -356,7 +356,7 @@ public class FilesTab extends TabItem implements 	ActionListener,
 		upButton = new JButton("Up", frame.gui.util.getImage("navigateup"));
 		upButton.addActionListener(this);
 		
-		JPanel directoryPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+		JPanel directoryPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 2));
 		directoryPanel.add(upButton);
 		directoryPanel.add(currentDirectory);
 		
