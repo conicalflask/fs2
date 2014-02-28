@@ -305,7 +305,7 @@ public class FilesTab extends TabItem implements 	ActionListener,
 	JTable filesTable;
 	LoadingAnimationHelper spinner;
 	JButton upButton;
-	JLabel currentDirectory;
+	JLabel directoryLabel;
 	
 	/**
 	 * Records the time at which tree nodes were expanded so that they may be collapsed if idle after a defined period.
@@ -332,7 +332,7 @@ public class FilesTab extends TabItem implements 	ActionListener,
 		});
 		fs.addTreeModelListener(spinner);
 		
-		currentDirectory = new JLabel();
+		directoryLabel = new JLabel();
 		
 		browseTree.setCellRenderer(browseTreeRenderer = new BrowseTreeCellRenderer());
 		browseTree.addTreeSelectionListener(this);
@@ -356,12 +356,12 @@ public class FilesTab extends TabItem implements 	ActionListener,
 		upButton = new JButton("Up", frame.gui.util.getImage("navigateup"));
 		upButton.addActionListener(this);
 		
-		JPanel directoryPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 2));
-		directoryPanel.add(upButton);
-		directoryPanel.add(currentDirectory);
+		JPanel navigationPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 2));
+		navigationPanel.add(upButton);
+		navigationPanel.add(directoryLabel);
 		
 		JPanel filesViewPanel = new JPanel(new BorderLayout());
-		filesViewPanel.add(directoryPanel, BorderLayout.NORTH);
+		filesViewPanel.add(navigationPanel, BorderLayout.NORTH);
 		filesViewPanel.add(filesView, BorderLayout.CENTER);
 		
 		splitPane.setRightComponent(filesViewPanel);
@@ -641,11 +641,11 @@ public class FilesTab extends TabItem implements 	ActionListener,
 		if (e.getPath().getLastPathComponent() instanceof FileSystemEntry) {
 			FileSystemEntry fse = (FileSystemEntry) e.getPath().getLastPathComponent();
 			if (fse.isSearch()) {
-				currentDirectory.setText(fse.getSearchTerms());
+				directoryLabel.setText(fse.getSearchTerms());
 			} else if (fse.isDirectory()) {
-				currentDirectory.setText(HttpUtil.urlDecode(fse.getIndexNodePath()));
+				directoryLabel.setText(HttpUtil.urlDecode(fse.getIndexNodePath()));
 			} else {
-				currentDirectory.setText("");
+				directoryLabel.setText("");
 			}
 		}
 	}
