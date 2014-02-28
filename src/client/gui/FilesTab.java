@@ -3,6 +3,7 @@ package client.gui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -48,6 +49,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 import common.FS2Constants;
+import common.HttpUtil;
 import common.ProgressTracker;
 import common.Util;
 
@@ -302,7 +304,8 @@ public class FilesTab extends TabItem implements 	ActionListener,
 	JSplitPane splitPane;
 	JTable filesTable;
 	LoadingAnimationHelper spinner;
-	
+	JButton upButton;
+	JLabel directoryLabel;
 	
 	/**
 	 * Records the time at which tree nodes were expanded so that they may be collapsed if idle after a defined period.
@@ -329,6 +332,8 @@ public class FilesTab extends TabItem implements 	ActionListener,
 		});
 		fs.addTreeModelListener(spinner);
 		
+		directoryLabel = new JLabel();
+		
 		browseTree.setCellRenderer(browseTreeRenderer = new BrowseTreeCellRenderer());
 		browseTree.addTreeSelectionListener(this);
 		browseTree.addMouseMotionListener(this);
@@ -347,7 +352,19 @@ public class FilesTab extends TabItem implements 	ActionListener,
 		filesTable.getColumn(fs.getColumnName(0)).setCellRenderer(new FilesTableNameRenderer());
 		
 		JScrollPane filesView = new JScrollPane(filesTable);
-		splitPane.setRightComponent(filesView);
+		
+		upButton = new JButton("Up", frame.gui.util.getImage("navigateup"));
+		upButton.addActionListener(this);
+		
+		JPanel navigationPanel = new JPanel(new FlowLayout(FlowLayout.LEADING, 5, 2));
+		navigationPanel.add(upButton);
+		navigationPanel.add(directoryLabel);
+		
+		JPanel filesViewPanel = new JPanel(new BorderLayout());
+		filesViewPanel.add(navigationPanel, BorderLayout.NORTH);
+		filesViewPanel.add(filesView, BorderLayout.CENTER);
+		
+		splitPane.setRightComponent(filesViewPanel);
 		splitPane.setDividerLocation(frame.gui.conf.getInt(CK.FILES_DIVIDER_LOCATION));
 		splitPane.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
 		
@@ -521,6 +538,12 @@ public class FilesTab extends TabItem implements 	ActionListener,
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource()==collapseTimer) {
 			collapseOldNodes();
+		} else if (e.getSource() == upButton) {
+			TreePath path = browseTree.getSelectionPath().getParentPath();
+			if (path != null && path.getPathCount() > 1) {
+				browseTree.setSelectionPath(path);
+				browseTree.collapsePath(path);
+			}
 		} else if (e.getActionCommand().equals("search")) {
 			if (searchQuery.getText().equals("")) return;
 			TreePath path = fs.newSearch(searchQuery.getText()).getPath();
@@ -612,7 +635,19 @@ public class FilesTab extends TabItem implements 	ActionListener,
 
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-		if (e.getPath().getLastPathComponent() instanceof ListableEntry) fs.setSelectedEntry((ListableEntry) e.getPath().getLastPathComponent());
+		if (e.getPath().getLastPathComponent() instanceof ListableEntry) {
+			fs.setSelectedEntry((ListableEntry) e.getPath().getLastPathComponent());
+		}
+		if (e.getPath().getLastPathComponent() instanceof FileSystemEntry) {
+			FileSystemEntry fse = (FileSystemEntry) e.getPath().getLastPathComponent();
+			if (fse.isSearch()) {
+				directoryLabel.setText(fse.getSearchTerms());
+			} else if (fse.isDirectory()) {
+				directoryLabel.setText(HttpUtil.urlDecode(fse.getIndexNodePath()));
+			} else {
+				directoryLabel.setText("");
+			}
+		}
 	}
 
 	@Override
