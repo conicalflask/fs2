@@ -63,6 +63,7 @@ public class FS2Filter extends Filter {
 	
 	private String alias = "Unnamed";
 	private int port = 0;
+	private long uid = 0;
 	private long queuetoken = 0;
 	private boolean automaticIndexnode;
 	
@@ -82,12 +83,17 @@ public class FS2Filter extends Filter {
 	public void setPort(int inPort) {
 		port = inPort;
 	}
+
+	public void setUID(long newUID) {
+		uid = newUID;
+	}
 	
 	public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
 		Headers h = exchange.getResponseHeaders();
 		h.add("fs2-version", FS2Constants.FS2_PROTOCOL_VERSION);
 		h.add("fs2-port", Integer.toString(port));
 		h.add("fs2-alias", alias);
+		h.add("fs2-indexnode-uid", Long.toString(uid));
 		if (automaticIndexnode) h.add("fs2-automatic", "true");
 		chain.doFilter(exchange);
 	}
